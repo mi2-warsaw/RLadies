@@ -101,8 +101,15 @@ pbsapply(oferty, function(url){
                        maksymalna_cena_dostawy = maksymalna_cena_dostawy,
                        licznik_sprzedazy = licznik_sprzedazy)
   }
-  as.data.frame(informacje)
+  t(as.data.frame(unlist(informacje)))
 }) -> info_oferty
 
 library(dplyr)
-do.call(info_oferty, bind_rows) ->info_oferty_binded
+pblapply(info_oferty, function(element){
+  element <- as.data.frame(element)
+}) -> info_oferty_2
+
+do.call(bind_rows, info_oferty_2) ->info_oferty_binded
+
+write.csv(info_oferty_binded, row.names = FALSE, quote = TRUE,
+          file = "00_Basics/pobranie_danych/oferty_informacje.csv")
