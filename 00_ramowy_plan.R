@@ -1,0 +1,54 @@
+# Ramowy plan warsztatu
+
+0) 3 słowa o tym, że R to język przeznaczony do analizy danych. Usprawnia myślenie o danych.
+1) Przedstawienie celu warsztatu i analizy.
+2) Do roboty! Skansen: pokazanie R GUI
+3) Uruchomienie RStudio (POPRZEZ URUCHOMIENIE PLIKU Z PROJEKTEM) i wymienienie głównych jego głównych zalet jako (wciąż rozwijanego) najpopularniejszego edytora tekstu przy pracy z językiem R
+4-5) Co jest co: nazwanie notatnika, konsoli i pozostałych paneli
+6) Żeby analizować trzeba mieć dane: wczytanie danych poprzez panel Tools -> Import Dataset
+7) Zwrócenie uwagi, że w trakcie wczytania danych przez klikanie pojawia się kod - podkreślenie zalety kodu jako historii i języka pracy. Czasem łatwiej przez maila
+skomentować komuś kod niż przez telefon tłumaczyć co ma po kolei kliknąć. Klikanie nie zostawia trwałej historii.
+8) Krótkie ommówienie kolumn z danych.
+9) Skopiowanie kodu wczytującego dane z konsoli do notatnika [kopiuj się funkcja i linijka z library]
+
+```{r}
+library(readr)
+oferty_informacje <- read_csv("~/dev/RLadies/00_Basics/pobranie_danych/oferty_informacje.csv")
+View(oferty_informacje)
+```
+
+10) Zapisanie notatnika. Otwarcie i zamknięcie dodatkowego notatnika jako przykład [trzeba powiedzieć jakie zalety ma praca z wieloma notatnikami i jaki jest sens zapisywania kodu do skryptów].
+11) Wskazanie na funkcję library -> R ma pomocne rozszerzenia, z których należy korzystać! 
+12-14) Omówienie czym jest funkcja. Niektórzy dopiero zaczynają przygodę z programowaniem. Wskazanie na skorzystanie już z 3 funckji - library, read_csv, View
+15) Wskazanie na zalety pracy z projektem, gdyż każdy ma jednolite drzewo projektu (ścieżkę). Dzięki czemu pierwsze wywołanie
+
+```{r}
+oferty_informacje <- read_csv("~/dev/RLadies/00_Basics/pobranie_danych/oferty_informacje.csv")
+```
+
+oraz wywoałnie do drzewa projektu dadzą ten sam efekt
+
+```{r}
+oferty_informacje <- read_csv("00_Basics/pobranie_danych/oferty_informacje.csv")
+```
+
+- WAŻNE
+
+16-17) PIERWSZE URUCHAMIANIE KODU - ctrl+enter / run / source 
+18) JAK ZORIENTOWAĆ SIĘ, ŻE POLECENIE JEST NIEKOMPLETNE (znak + w konsoli)
+19) PO CO JEST KARETKA - wskazuje, że można wprowadzać NOWE polecenia do konsoli
+20) JAK PRZERWAĆ NIEKOMPLETNE POLECENIE - esc / STOP
+21) PRZYKŁAD ERRORA - skąd wiedzieć, że coś się nie udało -> najlepiej podać błedną nazwę pliku i pokazać komunikat - najczęstszy błąd i początkujących
+
+22) Jak sprawdzić sciężkę w której pracujemy i jak ją zmienić? `getwd()` i `setwd()`
+
+23) Wskazanie na pojawiąjące się rzeczy w oknie Environment (Globalne Środowisko Zmiennych). Wyjaśnienie operatora `<-` + zastosowanie w przykładzie `x<-5`.
+24) Prezentacja zalet korzystania ze zmiennych wraz z wskazaniem na arytmetyczne funkcje R `log(5), log(x)`. R to w końcu taki duży kalkulator.
+25) Prezentacja funckji zwracających statystki dotyczące danych, z którymi pracujemy. `str(), dim(), head(), summary()`.
+26) Odwołanie się do `table(oferty_informacje[, 1], oferty_informacje[, 2])` - funkcje dwuargumentowe + odwołanie się do kolumn danych.
+27) Opisanie innych sposobów odwoływania się do kolumn - `$, nazwa`.
+28) Wskazanie różnicy między samotną kolumną (wektorem) a całą ramką danych - dowiadujemy się, że w R obiekty mogą być przedstawiane za pomocą różnych typów obiektów.
+29) Izomorfizm funkcji - funkcje o tych samych nazwach moga działać różnie na innych typach obiektów - `summary` na ramce danych a `summary` na wektorze.
+30) Ale co w ogóle robi `summary`? Jak się dowiedzieć co ta funkcja robi -> `?` + `help(nazwa_funkji)`?
+31) Jak znaleźć funkcję, spełniająca moje potrzeby? Google+stackexchange
+32) Co to jest sesja w R? Zamknięcie RStudio tak by zapisałe stan sesji. Wczytanie RStudio tak by uruchomił ostatnią sesję. Zamknięcie RStudio tak by nie zapisywał sesji. Zrestartowanie sesji.
