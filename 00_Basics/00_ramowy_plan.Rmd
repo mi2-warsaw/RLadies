@@ -1,6 +1,8 @@
 
 # Ramowy plan warsztatu
 
+##  Zapoznanie ze środowiskiem R i edytorem RStudio.
+
 0) 3 słowa o tym, że R to język przeznaczony do analizy danych. Usprawnia myślenie o danych.
 1) Przedstawienie celu warsztatu i analizy.
 2) Do roboty! Skansen: pokazanie R GUI
@@ -9,8 +11,8 @@
 6) Żeby analizować trzeba mieć dane: wczytanie danych poprzez panel Tools -> Import Dataset
 7) Zwrócenie uwagi, że w trakcie wczytania danych przez klikanie pojawia się kod - podkreślenie zalety kodu jako historii i języka pracy. Czasem łatwiej przez maila
 skomentować komuś kod niż przez telefon tłumaczyć co ma po kolei kliknąć. Klikanie nie zostawia trwałej historii.
-8) Krótkie ommówienie kolumn z danych.
-9) Skopiowanie kodu wczytującego dane z konsoli do notatnika [kopiuj się funkcja i linijka z library]
+8) Krótkie ommówienie kolumn w danych.
+9) Skopiowanie kodu wczytującego dane z konsoli do notatnika [kopiuje się funkcja i linijka z library]
 
 ```{r}
 library(readr)
@@ -46,10 +48,46 @@ oferty_informacje <- read_csv("00_Basics/pobranie_danych/oferty_informacje.csv")
 23) Wskazanie na pojawiąjące się rzeczy w oknie Environment (Globalne Środowisko Zmiennych). Wyjaśnienie operatora `<-` + zastosowanie w przykładzie `x<-5`.
 24) Prezentacja zalet korzystania ze zmiennych wraz z wskazaniem na arytmetyczne funkcje R `log(5), log(x)`. R to w końcu taki duży kalkulator.
 25) Prezentacja funckji zwracających statystki dotyczące danych, z którymi pracujemy. `str(), dim(), head(), summary()`.
-26) Odwołanie się do `table(oferty_informacje[, 1], oferty_informacje[, 2])` - funkcje dwuargumentowe + odwołanie się do kolumn danych.
+26) PRZYKŁAD NA MTCARS: Odwołanie się do `head(mtcars);table(mtcars$gear, mtcars$carb)` - funkcje dwuargumentowe + odwołanie się do kolumn danych.
+26.5) **ZAZNACZENIE RÓŻNIC MIĘDZY STARYM ŚWIATEM - data.frame A NOWYM - tibble/tbl_df.
 27) Opisanie innych sposobów odwoływania się do kolumn - `$, nazwa`.
 28) Wskazanie różnicy między samotną kolumną (wektorem) a całą ramką danych - dowiadujemy się, że w R obiekty mogą być przedstawiane za pomocą różnych typów obiektów.
 29) Izomorfizm funkcji - funkcje o tych samych nazwach moga działać różnie na innych typach obiektów - `summary` na ramce danych a `summary` na wektorze.
 30) Ale co w ogóle robi `summary`? Jak się dowiedzieć co ta funkcja robi -> `?` + `help(nazwa_funkji)`?
 31) Jak znaleźć funkcję, spełniająca moje potrzeby? Google+stackexchange
 32) Co to jest sesja w R? Zamknięcie RStudio tak by zapisałe stan sesji. Wczytanie RStudio tak by uruchomił ostatnią sesję. Zamknięcie RStudio tak by nie zapisywał sesji. Zrestartowanie sesji.
+
+
+## Wstępna analiza poznawcza danych
+
+Może konstrukcja funkcji i przepływy warunkowe
+
+```{r}
+library(readr)
+oferty_informacje <- read_csv("~/dev/RLadies/00_Basics/pobranie_danych/oferty_informacje.csv")
+```
+
+### Sprzedający o największej liczbie ofert
+
+Standardowy R
+
+```{r}
+# install.packages('dplyr')
+tabela_sprzedajacych <- table(oferty_informacje$sprzedajacy)
+tabela_sprzedajacych_sort <- sort(tabela_sprzedajacych, decreasing = TRUE)
+head(tabela_sprzedajacych_sort,20)
+```
+
+Przy pomocy funkcji z pakietu do manipulacji danych `dplyr`
+
+```{r}
+library(dplyr)
+count_sprzedajacych <- count(oferty_informacje, sprzedajacy, sort = TRUE)
+head(count_sprzedajacych,20)
+```
+
+### Najdroższe oferty
+
+### Kto ma najwięcej par butów jeszcze do sprzedania?
+
+### Które aukcje cieszą się największym powodzeniem?
