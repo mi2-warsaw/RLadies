@@ -11,7 +11,7 @@
 6) Żeby analizować trzeba mieć dane: wczytanie danych poprzez panel Tools -> Import Dataset
 7) Zwrócenie uwagi, że w trakcie wczytania danych przez klikanie pojawia się kod - podkreślenie zalety kodu jako historii i języka pracy. Czasem łatwiej przez maila
 skomentować komuś kod niż przez telefon tłumaczyć co ma po kolei kliknąć. Klikanie nie zostawia trwałej historii.
-8) Krótkie ommówienie kolumn w danych.
+8) Krótkie omówienie kolumn w danych.
 9) Skopiowanie kodu wczytującego dane z konsoli do notatnika [kopiuje się funkcja i linijka z library]
 
 ```{r}
@@ -86,8 +86,71 @@ count_sprzedajacych <- count(oferty_informacje, sprzedajacy, sort = TRUE)
 head(count_sprzedajacych,20)
 ```
 
-### Najdroższe oferty
+- Dedykowane funkcje do najpopularniejszych operacji
+- Przyjazny wynik
 
-### Kto ma najwięcej par butów jeszcze do sprzedania?
+### Najdroższe oferty (ale butów)
 
-### Które aukcje cieszą się największym powodzeniem?
+```{r}
+oferty_informacje_arr <- arrange(oferty_informacje, cena)
+(cena_tytul <- select(oferty_informacje_arr, cena, tytul))
+```
+
+
+```{r}
+oferty_informacje_arr_desc <- arrange(oferty_informacje, desc(cena))
+(cena_tytul_desc <- select(oferty_informacje_arr_desc, cena, tytul))
+head(cena_tytul_desc, 20)
+```
+
+Ale butów
+
+```{r}
+oferty_informacje_low <- mutate(oferty_informacje, tytul_lower = tolower(tytul))
+
+zapietki_wkladki <- grepl('zapiętki|wkładki', oferty_informacje_low$tytul_lower)
+
+table(zapietki_wkladki)
+# !TRUE
+oferty_informacje_low[zapietki_wkladki, ]
+oferty_informacje_low[!zapietki_wkladki, ]
+filter(oferty_informacje_low, !zapietki_wkladki)
+filter(oferty_informacje_low, !grepl('zapiętki|wkładki', oferty_informacje_low$tytul_lower)) -> oferty_informacje_buty 
+```
+
+```{r}
+select(
+  arrange(oferty_informacje_buty, cena),
+  cena, tytul_lower
+)
+```
+
+#### Zadanie 1
+
+Dalej mamy oferty, które nie dotyczą butów, lecz dodatków do nich.
+W parach, znaleźć najtańszą ofertę z butami.
+
+#### Zadanie 2
+
+Bazując na wyfiltrowanych danych z Zadania 1, sprawdź kto ma najwięcej par butów jeszcze do sprzedania? A kto najwięcej na tym może jeszcze zarobić?
+
+WSKAZÓWKA: Kolumny można dodawać na wiele sposobów. Jednym z nich jest transformacja kilku obecnych już kolumn w danych. Możliwe są wszystkie operacje arytmetyczne. Przykład
+
+```{r}
+head(mtcars)
+head(mutate(mtcars, gear_razy_carb = gear*carb))
+# mozna dodac kilka kolumn
+head(
+  mutate(mtcars, 
+         gear_razy_carb = gear*carb,
+         duzo_operacji = sqrt(wt)/exp(qsec)+drat)
+)
+```
+
+
+#### Zadanie 3
+
+Operacja na tekstach: które aukcje cieszą się największym powodzeniem?
+
+
+## Wizualizacja wyników
