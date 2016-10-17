@@ -1,3 +1,4 @@
+
 # Ramowy plan warsztatu
 
 0) 3 słowa o tym, że R to język przeznaczony do analizy danych. Usprawnia myślenie o danych.
