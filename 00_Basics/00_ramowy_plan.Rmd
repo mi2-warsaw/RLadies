@@ -9,9 +9,9 @@
 
 2) Do roboty! Skansen: pokazanie R GUI
 
-3) Uruchomienie RStudio (POPRZEZ URUCHOMIENIE PLIKU Z PROJEKTEM) i wymienienie głównych jego głównych zalet jako (wciąż rozwijanego) najpopularniejszego edytora tekstu przy pracy z językiem R
+3) Uruchomienie RStudio (POPRZEZ URUCHOMIENIE PLIKU Z PROJEKTEM) i wymienienie głównych jego głównych zalet jako (wciąż rozwijanego) najpopularniejszego edytora tekstu przy pracy z językiem R.
 
-4-5) Co jest co: nazwanie notatnika, konsoli i pozostałych paneli
+4-5) Co jest co: nazwanie notatnika, konsoli i pozostałych paneli.
 
 6) Żeby analizować trzeba mieć dane: wczytanie danych poprzez panel Tools -> Import Dataset
 
@@ -20,29 +20,31 @@ skomentować komuś kod niż przez telefon tłumaczyć co ma po kolei kliknąć.
 
 8) Krótkie omówienie kolumn w danych.
 
-9) Skopiowanie kodu wczytującego dane z konsoli do notatnika [kopiuje się funkcja i linijka z library]
+9) Skopiowanie kodu wczytującego dane z konsoli do notatnika.
 
 ```{r}
-library(readr)
-oferty_informacje <- read_csv("~/dev/RLadies/00_Basics/pobranie_danych/oferty_informacje.csv")
+oferty_informacje <- read.csv("~/dev/RLadies/00_Basics/pobranie_danych/oferty_informacje.csv")
 View(oferty_informacje)
 ```
 
 10) Zapisanie notatnika. Otwarcie i zamknięcie dodatkowego notatnika jako przykład [trzeba powiedzieć jakie zalety ma praca z wieloma notatnikami i jaki jest sens zapisywania kodu do skryptów].
 
-11) Wskazanie na funkcję library -> R ma pomocne rozszerzenia, z których należy korzystać! 
+11) Wskazanie na funkcję library i install.packages-> R ma pomocne rozszerzenia, z których należy korzystać! 
 
-12-14) Omówienie czym jest funkcja. Niektórzy dopiero zaczynają przygodę z programowaniem. Wskazanie na skorzystanie już z 3 funckji - library, read_csv, View
+11.5) Omówienie panelu do ręcznej i klikalnej instalacji pakietów. 
+
+12-14) Omówienie czym jest funkcja. Niektórzy dopiero zaczynają przygodę z programowaniem. Wskazanie na skorzystanie już z 4 funckji - library, read.csv, View, install.packages
+
 15) Wskazanie na zalety pracy z projektem, gdyż każdy ma jednolite drzewo projektu (ścieżkę). Dzięki czemu pierwsze wywołanie
 
 ```{r}
-oferty_informacje <- read_csv("~/dev/RLadies/00_Basics/pobranie_danych/oferty_informacje.csv")
+oferty_informacje <- read.csv("~/dev/RLadies/00_Basics/pobranie_danych/oferty_informacje.csv")
 ```
 
 oraz wywoałnie do drzewa projektu dadzą ten sam efekt
 
 ```{r}
-oferty_informacje <- read_csv("00_Basics/pobranie_danych/oferty_informacje.csv")
+oferty_informacje <- read.csv("00_Basics/pobranie_danych/oferty_informacje.csv")
 ```
 
 - WAŻNE
@@ -67,9 +69,7 @@ oferty_informacje <- read_csv("00_Basics/pobranie_danych/oferty_informacje.csv")
 
 26) PRZYKŁAD NA MTCARS: Odwołanie się do `head(mtcars);table(mtcars$gear, mtcars$carb)` - funkcje dwuargumentowe + odwołanie się do kolumn danych.
 
-26.5) **ZAZNACZENIE RÓŻNIC MIĘDZY STARYM ŚWIATEM - data.frame A NOWYM - tibble/tbl_df.
-
-27) Opisanie innych sposobów odwoływania się do kolumn - `$, nazwa`.
+27) Opisanie innych sposobów odwoływania się do kolumn - `$, nazwa`, numer.
 
 28) Wskazanie różnicy między samotną kolumną (wektorem) a całą ramką danych - dowiadujemy się, że w R obiekty mogą być przedstawiane za pomocą różnych typów obiektów.
 
@@ -84,11 +84,8 @@ oferty_informacje <- read_csv("00_Basics/pobranie_danych/oferty_informacje.csv")
 
 ## Wstępna analiza poznawcza danych
 
-Może konstrukcja funkcji i przepływy warunkowe
-
 ```{r}
-library(readr)
-oferty_informacje <- read_csv("~/dev/RLadies/00_Basics/pobranie_danych/oferty_informacje.csv")
+oferty_informacje <- read.csv("~/dev/RLadies/00_Basics/pobranie_danych/oferty_informacje.csv")
 ```
 
 ### Sprzedający o największej liczbie ofert
@@ -154,9 +151,38 @@ select(
 Dalej mamy oferty, które nie dotyczą butów, lecz dodatków do nich.
 W parach, znaleźć najtańszą ofertę z butami.
 
+#### Agregacje i statystyki w grupach
+
+WSKAZÓWKA: Przydadzą się funkcje do agregacji wartości w grupach.
+
+Na przykładzie zbioru `iris`
+
+```{r}
+iris[c(1, 2, 51, 52, 101, 102), ]
+```
+
+można się zorientować, że zbiór przedstawia długość i szerokość płatków i łodyg irysów w w zależności od jego gatunku.
+
+Można zbiór podzielić na grupy, ze względu na gatunek
+
+```{r}
+iris_g <- group_by(iris, Species)
+```
+
+a następnie w grupach policzyć średnią wartość `Sepal.Length` i sumę wartości `Petal.Width`
+
+```{r}
+summarise(iris_g, Speal.Length.sr = mean(Sepal.Length), Petal.Width.sum = sum(Petal.Width))
+```
+
 #### Zadanie 2
 
-Bazując na wyfiltrowanych danych z Zadania 1, sprawdź kto ma najwięcej par butów jeszcze do sprzedania? A kto najwięcej na tym może jeszcze zarobić?
+Bazując na wyfiltrowanych danych z Zadania 1, sprawdź kto (grupując po sprzedawcy) ma najwięcej par butów jeszcze do sprzedania (wśród wszystkich swoich aukcji)? 
+
+
+#### Zadanie 3 
+
+A kto najwięcej może jeszcze zarobić na swoich trwających aukcjach?
 
 WSKAZÓWKA: Kolumny można dodawać na wiele sposobów. Jednym z nich jest transformacja kilku obecnych już kolumn w danych. Możliwe są wszystkie operacje arytmetyczne. Przykład
 
@@ -172,8 +198,19 @@ head(
 ```
 
 
-#### Zadanie 3
-
-Operacja na tekstach: które aukcje cieszą się największym powodzeniem?
+# O ile starczy czasu
 
 ## Wizualizacja wyników
+
+```{r}
+hist(oferty_informacje$cena)
+hist(oferty_informacje_buty$cena)
+```
+
+## konstrukcja funkcji i instrukcje warunkowe (if)
+
+## tibble
+
+26.5) **ZAZNACZENIE RÓŻNIC MIĘDZY STARYM ŚWIATEM - data.frame A NOWYM - tibble/tbl_df.
+
+## magrittr %>% ?
