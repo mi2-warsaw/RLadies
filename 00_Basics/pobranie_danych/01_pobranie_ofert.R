@@ -31,7 +31,8 @@ pbsapply(oferty, function(url){
     html_nodes(oferta, '.clear') %>% 
     html_text() %>%
     stri_extract(regex = '[0-9,]+') %>%
-    gsub(replacement = ".", pattern = ",", fixed = TRUE)
+    gsub(replacement = ".", pattern = ",", fixed = TRUE) %>%
+    as.numeric()
   if(!(length(cena_przesylek) ==0)) {
     minimalna_cena_dostawy <- min(cena_przesylek)
     maksymalna_cena_dostawy <- max(cena_przesylek)
@@ -112,4 +113,4 @@ pblapply(info_oferty, function(element){
 do.call(bind_rows, info_oferty_2) ->info_oferty_binded
 
 write.csv(info_oferty_binded, row.names = FALSE, quote = TRUE,
-          file = "00_Basics/pobranie_danych/oferty_informacje.csv")
+          file = "pobranie_danych/oferty_informacje.csv")
