@@ -4,5 +4,5 @@
 
 - Marcin Kosiński
 - Natalia Potocka
-- Marta Sommer
+- Olga Mierzwa-Sulima
 - Agnieszka Tomczak
