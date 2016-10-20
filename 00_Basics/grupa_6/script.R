@@ -1,5 +1,5 @@
 # Wczytanie ramki danych
-oferty_informacje <- read.csv('pobranie_danych/oferty_informacje.csv')
+oferty_informacje <- read.csv('00_Basics/pobranie_danych/oferty_informacje.csv')
 
 # Jak możemy zobaczyć dane?
 View(oferty_informacje)
@@ -66,4 +66,4 @@ summarise(oferty_informacje_lok, count = n(), sr_cena = mean(cena, na.rm = T))
 
 #  Proste wizualizacje
 hist(oferty_informacje$cena)
-hist(oferty_informacje_buty$cena)
+hist(oferty_informacje_flt$cena)
