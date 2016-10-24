@@ -1,0 +1,369 @@
+---
+title: "R Ladies: warsztaty z pakietu ggplot2"
+author: "Marta Sommer"
+date: "20 października 2016"
+output: html_document
+---
+
+```{r setup, include = FALSE}
+
+knitr::opts_chunk$set(echo = FALSE)
+
+```
+
+## Pakiety
+
+Zainstaluj pakiet:
+
+```{r, eval = FALSE, message = FALSE, warning = FALSE, echo = TRUE}
+
+install.packages("ggplot2")
+
+```
+
+Załaduj pakiety:
+
+```{r, message = FALSE, warning = FALSE, echo = TRUE}
+
+library("ggplot2") # do rysowania wykresow
+library("ggrepel") # ladniejsze geom_text()
+
+library("PogromcyDanych") # dane znajduja sie w tym pakiecie
+
+library("tidyr") # do zmieniania tabeli z postaci szerokiej w waska
+library("dplyr") # do roznych (troche sql-owych) operacji na tabelach
+
+library("plotly") # interaktywne wykresy
+
+```
+
+## Cheatsheet
+
+https://www.rstudio.com/wp-content/uploads/2015/03/ggplot2-cheatsheet.pdf
+
+## Dane
+
+```{r, message = FALSE, warning = FALSE, echo = TRUE}
+
+data("koty_ptaki")
+koty_ptaki
+
+```
+
+## Struktura
+
+```{r, message = FALSE, warning = FALSE, echo = TRUE, eval = FALSE}
+
+ggplot(ramka_z_danymi, aes(x = ?, y = ?, color = ?, fill = ?, label = ?, 
+                           shape = ?, size = ?)) +
+     geom_point(...) +
+     geom_bar(...) +
+     geom_line(...) +
+     geom_text(...) +
+     ...
+     coord_flip(...) +
+     ...
+     facet_grid(...) +
+     ...     
+     theme_(bw/minimal/gray/...) +
+     theme(axis.title = element_text(...),
+           axis.text = element_text(...),
+           legend.position = "top/bottom/...") +
+     labs(title = "...", x = "...", y = "...") +
+     ...
+     scale_y_manual(values = ..., name = "...", label = ...) +
+     scale_y_discrete() +
+     scale_color_manual() +
+     ...
+     
+```
+
+## Geometrie i mapowania
+
+Prosy wykres punktowy zależności długości od wagi:
+
+```{r, message = FALSE, warning = FALSE, echo = TRUE}
+
+ggplot(koty_ptaki, aes(x = dlugosc, y = waga)) +
+     geom_point()
+
+```
+
+Dodajmy do wykresu jeszcze kolor określający drużynę:
+
+```{r, message = FALSE, warning = FALSE, echo = TRUE}
+
+ggplot(koty_ptaki, aes(x = dlugosc, y = waga, color = druzyna)) +
+     geom_point()
+     
+
+```
+
+Jedna obserwacja jest ewidentnie odstająca w grupie ptaków - dowiedzmy się jaka:
+
+```{r, message = FALSE, warning = FALSE, echo = TRUE}
+
+ggplot(koty_ptaki, aes(x = dlugosc, y = waga, color = druzyna, label = gatunek)) +
+     geom_point() +
+     geom_text()
+
+```
+
+Punkty są za bliko siebie i napisy na siebie zachodzą. Ładnie radzi z tym sobie biblioteka `ggrepel` z funkcją `geom_text_repel()` zamiast `geom_text()`
+
+```{r, message = FALSE, warning = FALSE, echo = TRUE}
+
+ggplot(koty_ptaki, aes(x = dlugosc, y = waga, color = druzyna, label = gatunek)) +
+     geom_point() +
+     geom_text_repel()
+
+```
+
+Przejdźmy teraz do wykresów, gdzie jedna ze zmiennych jest dyskretna. Przykładowo przedstawmy zależność prędkości od drużyny:
+
+```{r, message = FALSE, warning = FALSE, echo = TRUE}
+
+ggplot(koty_ptaki, aes(x = druzyna, y = predkosc)) +
+     geom_point() +
+     geom_boxplot()
+     
+```
+
+Jeśli nas interesuje, które wartości są odstające, to dodajmy tekst:
+
+```{r, message = FALSE, warning = FALSE, echo = TRUE}
+
+ggplot(koty_ptaki, aes(x = druzyna, y = predkosc, label = gatunek)) +
+     geom_point() +
+     geom_boxplot() +
+     geom_text()
+     
+```
+
+## Stylowanie wykresów
+
+Zmiana układu współrzędnych (zamiana osi OX z osią OY):
+
+```{r, message = FALSE, warning = FALSE, echo = TRUE}
+
+ggplot(koty_ptaki, aes(x = druzyna, y = predkosc, fill = druzyna)) +
+     geom_boxplot() +
+     coord_flip()
+     
+```
+
+Tytuł i nazwy osi:
+
+```{r, message = FALSE, warning = FALSE, echo = TRUE}
+
+ggplot(koty_ptaki, aes(x = druzyna, y = predkosc, fill = druzyna)) +
+     geom_boxplot() +
+     coord_flip() +
+     labs(title = "Drużyna vs. prędkość", x = "DRUŻYNA", y = "PRĘDKOŚĆ")
+     
+```
+
+Motywy (`theme_bw()`, `theme_minimal()`, `theme_classic()`, `theme_gray()`, ...):
+
+```{r, message = FALSE, warning = FALSE, echo = TRUE}
+
+ggplot(koty_ptaki, aes(x = druzyna, y = predkosc, fill = druzyna)) +
+     geom_boxplot() +
+     coord_flip() +
+     labs(title = "Drużyna vs. prędkość", x = "DRUŻYNA", y = "PRĘDKOŚĆ") +
+     theme_minimal()
+
+ggplot(koty_ptaki, aes(x = druzyna, y = predkosc, fill = druzyna)) +
+     geom_boxplot() +
+     coord_flip() +
+     labs(title = "Drużyna vs. prędkość", x = "DRUŻYNA", y = "PRĘDKOŚĆ") +
+     theme_bw() 
+
+```
+
+Stylowanie szczegółów (wielkość tekstu, czcionka, ...):
+
+```{r, message = FALSE, warning = FALSE, echo = TRUE}
+
+ggplot(koty_ptaki, aes(x = druzyna, y = predkosc, fill = druzyna)) +
+     geom_boxplot() +
+     coord_flip() +
+     labs(title = "Drużyna vs. prędkość", x = "DRUŻYNA", y = "PRĘDKOŚĆ") +
+     theme_minimal() +
+     theme(axis.title.y = element_text(size = 25, color = "blue"),
+           axis.text.x = element_text(face = "bold"),
+           legend.position = "bottom")
+
+```
+
+Modyfikacja skali (`scale_color_discrete()`, `scale_fill_manual()`, ...):
+
+```{r, message = FALSE, warning = FALSE, echo = TRUE}
+
+ggplot(koty_ptaki, aes(x = druzyna, y = predkosc, fill = druzyna)) +
+     geom_boxplot() +
+     coord_flip() +
+     labs(title = "Drużyna vs. prędkość", x = "DRUŻYNA", y = "PRĘDKOŚĆ") +
+     theme_minimal() +
+     theme(axis.title.y = element_text(size = 25, color = "blue"),
+           axis.text.x = element_text(face = "bold"),
+           legend.position = "bottom") +
+     scale_fill_manual(values = c("red", "blue"), labels = c("Koty", "Ptaki"), name = "")
+
+```
+
+## Dane o serialach
+
+```{r, message = FALSE, warning = FALSE, echo = TRUE}
+
+data("serialeIMDB")
+head(serialeIMDB)
+
+```
+
+Wyciągamy tylko dane o 'Grze o tron' i rysujemy wykres zależności oceny od sezonu:
+
+```{r, message = FALSE, warning = FALSE, echo = TRUE}
+
+serialeIMDB %>% filter(serial == "Game of Thrones") -> gra_o_tron
+
+ggplot(gra_o_tron, aes(x = sezon, y = ocena)) +
+     geom_point()
+
+```
+
+Zamiast punktów możemy narysować wykresy pudełkowe:
+
+```{r, message = FALSE, warning = FALSE, echo = TRUE}
+
+ggplot(gra_o_tron, aes(x = sezon, y = ocena)) +
+     geom_boxplot()
+
+```
+
+A teraz wybierzmy więcej seriali i dla nich narysujmy to samo:
+
+```{r, message = FALSE, warning = FALSE, echo = TRUE}
+
+serialeIMDB %>% filter(serial %in% c("Game of Thrones", "Sherlock", "Breaking Bad")) -> seriale
+
+ggplot(seriale, aes(x = sezon, y = ocena)) +
+     geom_boxplot()
+
+```
+
+Warto byłoby odróżniać seriale:
+
+```{r, message = FALSE, warning = FALSE, echo = TRUE}
+
+ggplot(seriale, aes(x = sezon, y = ocena, fill = serial)) +
+     geom_boxplot()
+
+```
+
+## Panele
+
+Trochę za dużo tego na jednym wykresie. Podzielmy to więc na panele:
+
+```{r, message = FALSE, warning = FALSE, echo = TRUE}
+
+ggplot(seriale, aes(x = sezon, y = ocena, fill = serial)) +
+     geom_boxplot() +
+     facet_grid( ~ serial)
+
+```
+
+'Sherlock' nie ma aż pięciu sezonów, więc 'uwolnijmy mu skalę':
+
+```{r, message = FALSE, warning = FALSE, echo = TRUE}
+
+ggplot(seriale, aes(x = sezon, y = ocena, fill = serial)) +
+     geom_boxplot() +
+     facet_grid(. ~ serial, scales = "free_x")
+
+```
+
+To samo, tylko poziomo:
+
+```{r, message = FALSE, warning = FALSE, echo = TRUE}
+
+ggplot(seriale, aes(x = sezon, y = ocena, fill = serial)) +
+     geom_boxplot() +
+     facet_grid(serial ~ ., scales = "free_x")
+
+```
+
+## Wykresy interaktywne
+
+Potrzebny tu jest pakiet `plotly()`.
+
+```{r, message = FALSE, warning = FALSE, echo = TRUE}
+
+ggplot(seriale, aes(x = sezon, y = ocena, fill = serial)) +
+     geom_boxplot() +
+     facet_grid(serial ~ ., scales = "free_x") -> wykres
+
+ggplotly(wykres)
+
+ggplot(koty_ptaki, aes(x = dlugosc, y = waga, color = druzyna, label = gatunek)) +
+     geom_point() +
+     geom_text() -> wykres2
+
+ggplotly(wykres2)
+
+```
+
+## Zadania
+
+Korzystamy ze zbioru `imiona_warszawa` i `serialeIMDB`:
+
+```{r, message = FALSE, warning = FALSE, echo = TRUE}
+
+head(imiona_warszawa)
+
+```
+
+### 1. Narysuj wykres przedstawiający zależność liczby dwojga wybranych dzieci urodzonych od roku.
+
+```{r, message = FALSE, warning = FALSE, echo = FALSE}
+
+ggplot(imiona_warszawa %>% 
+            group_by(imie, plec, rok) %>% 
+            summarise(liczba = sum(liczba)) %>% 
+            filter(imie %in% c("Marta", "Łukasz")), 
+     aes(x = rok, y = liczba, color = imie)) +
+     geom_line() +
+     theme_bw()
+
+```
+
+### 2. Przedstaw na wykresie liczbę głosów oddanych na kolejne odcinki wybranego serialu (z dodatkowym wymiarem przedstawionym kolorem - oceną).
+
+```{r, message = FALSE, warning = FALSE, echo = FALSE}
+
+serialeIMDB %>% 
+     filter(serial == "Breaking Bad", 
+            sezon == 1) -> dane
+
+ggplot(dane, aes(x = odcinek, y = glosow, fill = ocena)) +
+     geom_bar(stat = "identity") +
+     labs(title = "Liczba głosów oddanych na pierwszy sezon serialu Breaking Bad") +
+     theme_minimal()
+```
+
+### 3. Przedstaw na wykresie liczbę głosów oddanych na kolejne odcinki wybranych dwóch seriali w zależności od oceny tych odcinków.
+
+```{r, message = FALSE, warning = FALSE, echo = FALSE}
+
+serialeIMDB %>% 
+     filter(serial %in% c("Breaking Bad", "Sherlock"), 
+            sezon == 1) -> dane2
+
+ggplot(dane2, aes(x = glosow, y = ocena, color = serial, label = odcinek)) +
+     geom_point() +
+     geom_text(vjust = 1)
+
+```
+
+
+
