@@ -1,4 +1,4 @@
-# R_Ladies
+# R-Ladies
 Warsaw R-Ladies Workshops
 
 
