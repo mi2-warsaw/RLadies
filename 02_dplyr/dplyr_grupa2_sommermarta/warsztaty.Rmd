@@ -1,0 +1,310 @@
+---
+title: "RLadies: dplyr (grupa nr 2)"
+output: html_notebook
+author: Marta Sommer
+date: 16 marca 2017 r.
+---
+
+Zainstalujmy pakiet:
+
+```{r, eval = FALSE}
+
+install.packages("dplyr")
+
+```
+
+Załadujmy pakiet:
+
+```{r, message = FALSE}
+
+library("dplyr")
+
+```
+
+Będziemy pracować na danych o produktach z McDonalda:
+
+```{r}
+
+menu <- read.csv("../dane/menu.csv", encoding = "UTF-8")
+head(menu)
+
+```
+
+Podstawowe funkcje:
+
+* **select** - wybierz kolumny
+* **arrange** - posortuj
+* **filter** - wybierz wiersze spełniające określone warunki
+* **mutate** - stwórz nową kolumnę
+* **summarise** - podsumuj (stwórz nową tabelę)
+* **group_by** - licz coś w grupach
+
+Podstawowy operator:
+
+* **%>%** (pipe) - Ctrl + Shift + M (skrót w RStudio)
+
+### SELECT
+
+1. wybieranie jednej kolumny:
+
+```{r}
+
+menu %>% 
+    select(Category)
+
+```
+
+2. wybieranie wielu kolumn:
+
+```{r}
+
+menu %>% 
+    select(Category,
+           Calories)
+
+```
+
+### ARRANGE
+
+1. wybierz dwie kolumny, a następnie posortuj po jednej z nich:
+
+```{r}
+
+menu %>% 
+    select(Item,
+           Calories) %>% 
+    arrange(Calories)
+
+```
+
+2. posortuj malejąco:
+
+```{r}
+
+menu %>% 
+    select(Item,
+           Calories) %>% 
+    arrange(desc(Calories))
+
+```
+
+3. posortuj podwóch kolumnach:
+
+```{r}
+
+menu %>% 
+    select(Item,
+           Calories) %>% 
+    arrange(desc(Calories),
+            Item)
+
+```
+
+### FILTER
+
+1. wybierz dania, które mają równo 100 kalorii:
+
+```{r}
+
+menu %>% 
+    filter(Calories == 100) %>% 
+    select(Item,
+           Category,
+           Calories)
+
+```
+
+2. wybierz dania, które mają mniej niż 100 kalorii:
+
+```{r}
+
+menu %>% 
+    filter(Calories < 100) %>% 
+    select(Item,
+           Category,
+           Calories)
+
+```
+
+3. wybierz dania, które mają mniej niż 100 kalorii i nie są napojem ('Beverages'):
+
+```{r}
+
+menu %>% 
+    filter(Calories < 100,
+           Category != "Beverages") %>% 
+    select(Item,
+           Category,
+           Calories)
+
+```
+
+4. wybierz dania, które mają mniej niż 100 kalorii, nie są napojem ('Beverages') i posortuj po liczbie kalorii:
+
+```{r}
+
+menu %>% 
+    filter(Calories < 100,
+           Category != "Beverages") %>% 
+    select(Item,
+           Category,
+           Calories) %>% 
+    arrange(Calories)
+
+```
+
+5. znajdź produkt zawierający najwięcej żelaza:
+
+```{r}
+
+menu %>% 
+    filter(Iron.PDV == max(Iron.PDV))
+
+```
+
+### MUTATE
+
+1. wybierzmy danie, jego zawartość tłuszczu i jaki to jest procent dziennej 'dawki' tłuszczu:
+
+```{r}
+
+menu %>% 
+    select(Item,
+           Total.Fat, 
+           Total.Fat.PDV)
+
+```
+
+Dowiedzmy się, jaka jest dzienna zalecana 'dawka' tłuszczu: (powiedzmy, że dobrze policzyli :D)
+
+```{r}
+
+menu %>% 
+    select(Item,
+           Total.Fat, 
+           Total.Fat.PDV) %>% 
+    mutate(dzienna_dawka_tluszczu = round(Total.Fat*100/Total.Fat.PDV))
+
+```
+
+2. stwórzmy nową kolumnę, w której będziemy mieć zawartość tłuszczu, a w nawiasie jaka to jest procentowa dzienna dawka:
+
+```{r}
+
+menu %>% 
+    select(Item,
+           Total.Fat, 
+           Total.Fat.PDV) %>% 
+    mutate(Fat = paste0(Total.Fat, " (", Total.Fat.PDV, "%)"))
+
+```
+
+
+### SUMMARISE
+
+1. policzmy średnią liczbę kalorii
+
+```{r}
+
+menu %>% 
+    summarise(sr_kalorie = mean(Calories))
+
+```
+
+
+2. policzmy średnią liczbę kalorii i średnią ilość tłuszczu:
+
+```{r}
+
+menu %>% 
+    summarise(sr_kalorie = mean(Calories),
+              sr_tluszcz = mean(Total.Fat))
+
+```
+
+3. policzmy ile jest dań:
+
+```{r}
+
+menu %>% 
+    summarise(n())
+
+```
+
+### GROUP_BY
+
+1. policzmy średnią liczbę kalorii w podziale na rodzaj posiłku:
+
+```{r}
+
+menu %>% 
+    group_by(Category) %>% 
+    summarise(sr_kalorie = mean(Calories)) %>% 
+    arrange(sr_kalorie)
+
+```
+
+2. policzmy ile jest dań w podziale na kategorie:
+
+```{r}
+
+menu %>% 
+    group_by(Category) %>% 
+    summarise(n())
+
+```
+
+3. znajdź produkt zawierający najwięcej żelaza w danej kategorii:
+
+```{r}
+
+menu %>% 
+    group_by(Category) %>% 
+    filter(Iron.PDV == max(Iron.PDV)) %>% 
+    select(Category, Item, Iron.PDV)
+
+```
+
+## ZADANIA:
+
+1. Wybierz kolumny: produkt (*Item*) oraz zawartość tłuszczu (*Total.Fat*). Posortuj tabelę malejąco po zawartości tłuszczu.
+
+2. Wybierz produkty (*Item*), które zawierają minimalnie 20, a maksymalnie 100 kalorii. 
+
+3. Znajdź produkt (*Item*), który zawiera najmniej cholesterolu (*Cholesterol*).
+
+4. Policz średnią zawartość cukru (*Sugar*) we wszystkich produktach.
+
+5. Dla każdego produktu (*Item*) policz jakim procentem jego wartości energetycznej (*Calories*) jest wartość energetyczna zawarta w tłuszczu (*Calories.from.Fat*). Wynik zaokrąglij do całości. 
+
+6. Znajdź produkt/-y (*Item*), które zawierają minimalną wartość sodu (*Sodium*). 
+
+7. Znajdź produkty (*Item*) z kategorii (*Category*) *Breakfast*, które zawierają najwięcej sodu.
+
+8. Dla każdej kategorii produktu (*Category*) znajdź średnią zawartość tłuszczu (*Total.Fat*).
+
+9. Dla każdej kategorii produktu (*Category*) znajdź minimalną zawartość cukru.
+
+10. Policz średnią zawartość cukru dla produktów (*Item*) będących McMuffinami (takimi, które w nazwie (*Item*) zawierają wyrażenie 'McMuffin').
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
