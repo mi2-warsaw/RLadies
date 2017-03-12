@@ -1,0 +1,187 @@
+---
+title: "R-Ladies dplyr workshop"
+output: html_notebook
+---
+
+Load libraries `dplyr` and `gapminder`.
+```{r}
+library(gapminder)
+library(dplyr)
+```
+
+Our data excerpt of the Gapminder data on life expectancy, GDP per capita, and population by country.
+
+```{r}
+gapminder
+class(gapminder)
+str(gapminder)
+```
+
+### Use `filter` to subset data row-wise
+
+```{r}
+filter(gapminder, country == "Poland")
+```
+
+**pipe** operator `%>%` that `dplyr` imports from `magrittr` package.
+The RStudio keyboard shortcut to insert it: `Ctrl + Shift + M` (Windows), `Cmd + Shift + M` (Mac).
+
+```{r}
+gapminder %>%
+  filter(country == "Poland") -> pl
+```
+
+Now lets's modificate the table a bit. Use `mutate` to change the value of `country` column and introduce `NA` there.
+
+```{r}
+pl %>%
+  mutate(country = NA) -> pl
+```
+
+Further let's filter all the Asian countries to a separate table and join `pl` data frome to it.
+```{r}
+gapminder %>%
+  filter(continent == "Asia") -> asia
+
+rbind(pl, asia) -> pl_asia
+```
+
+
+Now let's look at our table `pl_asia` and the behaviour of `filter` with `factors`
+```{r}
+pl_asia %>% nrow
+
+pl_asia %>% filter(country == "Afghanistan") %>% nrow
+pl_asia %>% filter(country != "Afghanistan") %>% nrow
+pl_asia %>% filter(!country %in% "Afghanistan") %>% nrow
+```
+
+Why the number of rows differs?
+
+Filter using multiple conditions `&`, `|`, `%in%` etc.
+
+```{r}
+gapminder %>%
+  filter(continent == "Asia", country == "Afghanistan")
+
+gapminder %>%
+  filter(continent == "Asia" & country == "Afghanistan")
+```
+
+###Use `mutate` to change the value of a column
+
+But we can use it to create a new column.
+
+```{r}
+gapminder %>%
+  mutate(country_uppercase = toupper(country))
+```
+
+This adds a new column `country_uppercase` with country in capital letters.
+
+Now let's set population `pop` values to 0 for `year` 1997 in a table **conditioning** on other column. Use `ifelse` or stricter `if_else`.
+
+```{r}
+gapminder %>%
+  mutate(population_adjusted = if_else(year == 1997, 0, pop)) -> adj_gapminder
+         
+adj_gapminder %>%
+  filter(year == 1997)
+```
+
+### Task for you
+Now a task for you. Do the same thing and create **pl_asia** `tibble` without `rbind` and only using `filter` and and `mutate`.
+
+### Use `select` to subset the data on variables or columns.
+
+```{r}
+gapminder %>%
+  select(country, pop)
+```
+
+Select can also `rename` a column
+
+```{r}
+gapminder %>%
+  select(country, pupulation = pop)
+```
+
+Use `select` to displace the variable. There are varius helper functions that works with `select`. See `?everything`.
+
+```{r}
+gapminder %>%
+  select(pupulation = pop, everything())
+```
+
+Now let's report `GDP per capita` relative to `Poland`. Call this new column `gdpPercap_relative_pl`.
+
+* `Filter` down the rows for Poland.
+* Create a new temporary `tmp` variable in gapminder:
+  * Extract the `gdpPercap` variable from the Polish data.
+  * `Replicate` (use `rep`) it once per country in the dataset, so it has the right length.
+* Divide raw `gdpPercap` by this Polish figure and create `gdpPercap_relative_pl`.
+* Discard the temporary variable of replicated Polish gdpPercap.
+
+```{r}
+pl <- gapminder %>%
+  filter(country == "Poland")
+
+pl_gap <- gapminder %>%
+  mutate(tmp = rep(pl$gdpPercap, nlevels(country)),
+         gdpPercap_relative_pl = gdpPercap / tmp,
+         tmp = NULL)
+```
+
+`mutate` builds new variables sequentially so you can reference earlier ones (like `tmp`) when defining later ones (like `gdpPercapRel`). Also, you can get rid of a variable by setting it to `NULL`.
+
+### Use `arrange` to row-order data in a principled way
+
+Let's arrange data by `year` and by `country`
+
+```{r}
+gapminder %>%
+  arrange(year, country)
+```
+
+Now let's do the same but in descending order and use `desc`
+
+```{r}
+gapminder %>%
+  arrange(-year, desc(country))
+```
+
+### Use `group_by` to report information on a group level.
+
+Let's check how many observations we have on a continent level.
+Use `sumamrise` to summarise a single column with count function `n()`.
+
+```{r}
+gapminder %>%
+  group_by(continent) %>%
+  summarise(n = n())
+```
+
+Use `count` to count the number of observations that honors grouping.
+```{r}
+gapminder %>%
+  count(continent)
+```
+
+Now let's summarise **every** column using `summarise_each` and calculate `min`, `max`, `median`, `mean` for `lifeExp`, `gdpPercap`.
+
+```{r}
+gapminder %>%
+  group_by(continent) %>%
+  summarise_each(funs(min, max, mean, median), lifeExp, gdpPercap)
+```
+
+### Task for you
+
+1. For `pl_gap` table filter data to `Europe` and find which country has the largest GDP per capita comparing to Poland (`gdpPercap_relative_pl`) in `year` 2007.
+
+Use `top_n` to select top (or bottom) n rows. 
+
+2. Next which country experienced the sharpest 5-year drop in life expectancy? Recall that this excerpt of the `Gapminder` data only has data every five years, e.g. for 1952, 1957, etc. So this really means looking at life expectancy changes between adjacent timepoints.
+
+
+

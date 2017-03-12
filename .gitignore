@@ -32,3 +32,6 @@ vignettes/*.pdf
 *.utf8.md
 *.knit.md
 .Rproj.user
+
+02_dplyr/dplyr_group3_solutions.Rmd
+*.nb.html
