@@ -183,5 +183,31 @@ Use `top_n` to select top (or bottom) n rows.
 
 2. Next which country experienced the sharpest 5-year drop in life expectancy? Recall that this excerpt of the `Gapminder` data only has data every five years, e.g. for 1952, 1957, etc. So this really means looking at life expectancy changes between adjacent timepoints.
 
+### Non-standard evaluation (NSE)
+`Dplyr` is using non-standard evaluation, but every function has it's SE version. `group_by` => `group_by_`, `arrage` => `arrange_` etc.
+
+```{r}
+columns_to_group <- c("continent")
+
+gapminder %>%
+    group_by_(.dots = columns_to_group) %>%
+    summarise(n = n())
+```
+
+Why this is handy? For example when converting your `dplyr` statements to functions.
+
+```{r}
+my_group_n_foo <- function (gap_data, columns_to_group) {
+  gap_data %>%
+    group_by_(.dots = columns_to_group) %>%
+    summarise(n = n())
+}
+
+my_group_n_foo(gapminder, "continent")
+my_group_n_foo(gapminder, c("continent", "country"))
+```
+
+
+
 
 
