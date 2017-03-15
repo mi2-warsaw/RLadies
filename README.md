@@ -1,5 +1,5 @@
-# RLadies
-Warsaw R Ladies Workshops
+# R-Ladies
+Warsaw R-Ladies Workshops
 
 
 - [Data Mining + dplyr = przetwarzanie i analiza danych w R](http://grupawp.github.io/codepot-workshop-2015/01_R_podstawy.html#dodatkowe-materiay)
