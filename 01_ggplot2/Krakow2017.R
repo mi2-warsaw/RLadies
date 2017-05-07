@@ -1,6 +1,17 @@
 # Best 250 series
 # http://www.imdb.com/chart/toptv/
- 
+## (1) read the new data with archivist
+
+library(archivist)
+series2017 <- aread("mi2-warsaw/RLadies/arepo/45aa16dc4dbf0d87e3e40eb9dc9d18ae")
+
+## (2) or read the old data with Pogromcy Danych
+
+library(PogromcyDanych)
+serialeIMDB
+
+## (3) or scrap the data from IMDB database
+
 library(rvest)
 library(dplyr)
 
@@ -27,7 +38,9 @@ series2017 %>%
   mutate(id = seq_along(Serie)) %>%
   ungroup() -> series2017
 
-# time for some datavis
+##
+## Time for some datavis
+##
 selected <- c("Gra o tron", "Breaking Bad", "Sherlock", "Westworld")
 
 dat <- series2017 %>%
