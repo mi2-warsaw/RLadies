@@ -1,0 +1,44 @@
+# Best 250 series
+# http://www.imdb.com/chart/toptv/
+ 
+library(rvest)
+library(dplyr)
+
+# read links and titles 
+page <- read_html("http://www.imdb.com/chart/toptv/")
+series <- html_nodes(page, ".titleColumn a")
+titles <- html_text(series)
+links <- html_attr(series, "href")
+codes <- sapply(strsplit(links, split = "/"), `[`, 3)
+
+# read details for series
+allSeries <- lapply(seq_along(codes), function(i) {
+  tab <- read_html(paste0("http://www.imdb.com/title/",codes[i],"/epdate?ref_=ttep_ql_4")) %>%
+    html_node("table") %>%
+    html_table()
+  data.frame(Serie = titles[i], tab[,1:4], Season = gsub(tab[,1], pattern="\\..*", replacement=""))
+})
+
+# put all together
+series2017 <- do.call(rbind, allSeries)
+series2017$UserVotes <- as.numeric(gsub(series2017$UserVotes, pattern = "[^0-9]", replacement = ""))
+series2017 %>% 
+  group_by(Serie) %>%
+  mutate(id = seq_along(Serie)) %>%
+  ungroup() -> series2017
+
+# time for some datavis
+selected <- c("Gra o tron", "Breaking Bad", "Sherlock", "Westworld")
+
+dat <- series2017 %>%
+  filter(Serie %in% selected)
+
+ggplot(dat, aes(id, UserRating)) + 
+  geom_point(aes(color=Season, size=UserVotes)) +
+  geom_smooth(se=FALSE, color="grey30") + 
+  facet_grid(Serie~.) +
+  theme_light() + theme(legend.position="none") +
+  scale_color_brewer(palette = 1, type = "qual") +
+  ggtitle("User ratings for selected TV series") + xlab("Episode No")
+
+
