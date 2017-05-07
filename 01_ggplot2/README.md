@@ -6,6 +6,7 @@
 
 # Materiały
 
+- [Warsztaty Krakow 2017](https://github.com/mi2-warsaw/RLadies/blob/master/01_ggplot2/Krakow2017.R)
 - [Wprowadzenie do ggplot2](http://pbiecek.github.io/Przewodnik/Wizualizacja/jak_tworzyc_wykresy_ggplot2.html)
 - [Gramatyka Wykresów](http://biecek.pl/Eseje/indexGramatyka.html)
 - [Podstawowa praca z danymi w R](http://pbiecek.github.io/Przewodnik/Programowanie/filter.html)
