@@ -41,7 +41,8 @@ series2017 %>%
 ##
 ## Time for some datavis
 ##
-selected <- c("Gra o tron", "Breaking Bad", "Sherlock", "Westworld")
+selected <- c("Gra o tron", "Breaking Bad", 
+              "Sherlock", "Westworld")
 
 dat <- series2017 %>%
   filter(Serie %in% selected)
@@ -52,6 +53,42 @@ ggplot(dat, aes(id, UserRating)) +
   facet_grid(Serie~.) +
   theme_light() + theme(legend.position="none") +
   scale_color_brewer(palette = 1, type = "qual") +
-  ggtitle("User ratings for selected TV series") + xlab("Episode No")
+  ggtitle("User ratings for selected TV series") + 
+  xlab("Episode No")
+
+
+
+
+mojSerial <- filter(dat, Serie == "Breaking Bad")
+head(mojSerial)
+
+ggplot(mojSerial, aes(x = id, y = UserRating)) +
+  geom_point() +
+  geom_smooth(se=FALSE) +
+  geom_smooth(method = "lm", se=FALSE, color="red") 
+  
+ggplot(mojSerial, aes(x = id, 
+                      y = UserRating,
+                      size=UserVotes)) +
+  geom_point(aes(color = Season)) +
+  geom_smooth() +
+  geom_smooth(aes(color = Season)) +
+  theme_bw()
+   
+ggplot(mojSerial, aes(x = Season, 
+                      fill = UserRating > 8.5)) +
+  geom_bar(position = "dodge")
+
+
+ggplot(mojSerial, aes(x = Season, 
+                      y = UserRating)) +
+  geom_point(position = "jitter") 
+
+
+
+
+
+
+
 
 
