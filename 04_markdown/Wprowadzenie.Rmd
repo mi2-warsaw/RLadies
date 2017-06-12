@@ -1,0 +1,37 @@
+# Przyk³ad Markdown
+
+*Oto nasz pierwszy dokument **Markdown**.*
+
+```{r message==FALSE}
+require(ggplot2)
+```
+
+```{r include=FALSE}
+data("diamonds")
+```
+
+## Podsumowanie informacji o zmiennych:
+
+Statystyki dotycz¹ce zmiennych:
+
+* carat
+* price
+* clarity
+* cut
+
+```{r echo = FALSE}
+summary(diamonds)[,c(1,2,4,7)]
+```
+
+## Wykresy:
+
+#### Wykres punktowy:
+```{r fig.align='center', warning= FALSE}
+ggplot(diamonds, aes(x=carat, y=price, color=clarity, size=cut)) + geom_point()
+```
+
+#### Wykres gêstoœci:
+```{r fig.width=8, fig.height=5,}
+ggplot(diamonds, aes(x=price, color=cut)) + geom_density()
+```
+

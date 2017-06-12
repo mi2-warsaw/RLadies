@@ -1,0 +1,69 @@
+---
+title: "Przyklad"
+output:
+  html_document: default
+  html_notebook: default
+  pdf_document: default
+---
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+library(ggplot2)
+library(dplyr)
+diamonds <- diamonds
+```
+
+#Regresja liniowa
+
+```{r warning=FALSE}
+library(ggplot2)
+model <- lm(price ~ carat + cut + clarity + color, data = diamonds)
+summary(model)$r.squared
+```
+
+# £adny wykres
+
+```{r warning=FALSE, message=FALSE}
+library(ggplot2)
+library(dplyr)
+dane <- 
+  diamonds %>% 
+  group_by(clarity) %>% 
+  summarise(mean_price = mean(price))
+
+ggplot(diamonds, aes(clarity)) + 
+  geom_bar(aes(fill=cut)) +
+  geom_point(data = dane, 
+             mapping = aes(x = clarity, y = mean_price), shape = 9)
+```
+
+# Interaktywny wykres szeregu czasowego
+
+```{r warning=FALSE}
+library(dygraphs)
+x<-100
+for(i in 1:1199) {
+  x[i+1] <- x[i] + rnorm(1,0,2)
+}
+szereg <- ts(x, start = 1917, frequency = 12)
+dygraph(szereg, main="Super wykres wylosowanych danych") %>% dyRangeSelector(dateWindow = c("1920-01-01", "1950-01-01"))
+```
+
+
+# Interaktywna mapa cieplna
+
+```{r warning=FALSE}
+library(d3heatmap)
+d3heatmap(mtcars, scale = "column", colors = "Spectral", dendrogram = "none")
+```
+
+# Za³¹czanie kodu z innego jêzyka programowania
+
+```{python}
+def greet(imiê):
+    print('Hej', imiê)
+
+greet('Olga')
+greet('Ada')
+greet('Panie Janie')
+    
+```
