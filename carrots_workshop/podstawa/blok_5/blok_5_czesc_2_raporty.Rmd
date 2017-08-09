@@ -1,0 +1,48 @@
+---
+title: "Mój pierwszy raport"
+author: "Alicja Gosiewska"
+date: "7 sierpnia 2017"
+output:
+  html_document: default
+---
+
+# R Markdown
+
+To jest przykładowy dokument R Markdown.
+
+Dokument można wygenerować używając przycisku **Knit**.
+
+
+## Umieszczanie kodu 
+
+```{r}
+head(cars)
+```
+
+Bez wyświetlenia kodu.
+
+```{r, echo=FALSE}
+head(cars)
+```
+
+
+Kod bez uruchamiania.
+
+```{r, eval=FALSE}
+x <- "ten kod nie zadziała, bo nie ma cudzyslowu zamykającego
+```
+
+
+
+## Dołączanie wykresów
+
+Przykładowy wykres.
+
+```{r}
+plot(x=cars$speed, y=cars$dist, main="Cars")
+```
+
+
+
+
+
