@@ -10,4 +10,4 @@ Warsaw R-Ladies Workshops
 - [In-depth introduction to machine learning in 15 hours of expert videos](http://www.r-bloggers.com/in-depth-introduction-to-machine-learning-in-15-hours-of-expert-videos/)
 - [Microsoft Launches Its First Free Online R Course on edX](http://www.r-bloggers.com/microsoft-launches-its-first-free-online-r-course-on-edx/)
 
-![datasaur](https://github.com/mi2-warsaw/RLadies/blob/master/datasaur.png)
+

@@ -3,8 +3,11 @@
 ###############
 #Podstawowe wykresy
 View(women)
+?women
+
 plot(women)
 ?plot
+
 plot(x=women$weight, y=women$height)
 plot(x=women$weight, y=women$height, pch=2)
 plot(x=women$weight, y=women$height, type="l")
@@ -18,8 +21,14 @@ plot(x=women$weight, y=women$height, type="l", main="Dane dotyczące kobiet w US
 
 
 ###ZADANIE
-#Dać zbiorek z kolumnami, wartości w których będą tworzyć obrazki (coś jak datazaur).
+#Wczytaj zbiór.
 #Popróbowac rysowania róznych kolumn, dodanie kolorków i tytułów.
+
+dane <- read.csv("dane.csv")
+
+
+
+
 
 
 
@@ -35,7 +44,11 @@ barplot(imiona_mentorki$liczba, names.arg=imiona_mentorki$imie, main="Imiona men
   #narysować histogram(gatunek - waga, żwotność, długość)
   #narysować wykres waga vs długość
   #Pamietajcie o tytułach i podpisach osi, kolory mile widziane ;)
+
 View(koty_ptaki)
+
+
+
 
 
 
@@ -43,14 +56,15 @@ View(koty_ptaki)
 #Histogram
 View(maturaExam)
 
-matura2013 <- filter(maturaExam, rok==2013, przedmiot=="matematyka")
+matura2013 <- filter(maturaExam, rok==2013, przedmiot=="j. polski")
 hist(matura2013$punkty)
-hist(matura2013$punkty, breaks = 50)
+hist(matura2013$punkty, breaks = 100)
 
 ### ZADANIE
-  #Na podstawie zbioru maturaExam sprawdź, czy również w przypadku matury z języka polskiego
+  #Na podstawie zbioru maturaExam sprawdź, czy również w przypadku matury z matematyki
   #występuje pik w okolicach 15 punktów.
   #Pamiętaj o tytule i podpisaniu osi wykresu.
+
 
 
 
