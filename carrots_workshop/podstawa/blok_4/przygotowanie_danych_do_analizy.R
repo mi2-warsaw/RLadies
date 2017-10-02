@@ -28,7 +28,7 @@ sapply(titanic, class)
   
   is.factor(titanic$Survived)
   
-  titanic$Survived=as.factor(titanic$Survived)
+  titanic$Survived<-as.factor(titanic$Survived)
   
   is.factor(titanic$Survived)
   

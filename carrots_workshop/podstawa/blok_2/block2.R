@@ -212,8 +212,8 @@ x <- 1:5
 all(x > 4)
 any(x > 4)
 
-is.numeric(x)
-is.character(x)
+#is.numeric(x)
+#is.character(x)
 
 which(x == 5)
 which(x > 5)
