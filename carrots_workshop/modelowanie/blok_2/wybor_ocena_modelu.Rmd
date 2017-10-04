@@ -19,7 +19,7 @@ library(broom) # tidy models
 
 ## Dane
 ```{r}
-load("../data/nyc_prices.rda") # prices_train_train
+load("../data/nyc_prices.rda") # prices_train
 prices_train %>% 
     head()
 ```
