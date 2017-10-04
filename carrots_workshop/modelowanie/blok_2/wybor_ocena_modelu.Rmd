@@ -220,8 +220,62 @@ cbind.data.frame(polynomial_data, predictions) %>%
 ```
 
 ### Regularyzacja parametrów
-```{r}
 
+#### LASSO
+
+W LASSO minimalizujemy funkcję straty, pilnując, by parametry $\beta$ nie miały dużej normy.
+
+$$\min_{\hat{\beta}}\frac{1}{n} \sum_{i = 1}^n(y_i - X\hat{\beta})^2 
+    \;\; \mathrm{dla} \;\; 
+\sum_{j = 1}^k|\beta_j| \leq t.$$
+$\beta_0$ jest pominięty w powyższej sumie! 
+$t$ to pewien hiperparametr, który wymaga ustalenia.
+
+
+```{r}
+if (!require(glmnet)) {
+    install.packages("glmnet")
+    library(glmnet)
+}
+
+single_lasso <- glmnet(poly(polynomial_data_train$x, 25), 
+                       polynomial_data_train$y, 
+                       lambda = 0.01)
+single_lasso$beta
+```
+
+#### Walidacja 
+```{r}
+lasso_val <- glmnet(poly(polynomial_data_train$x, 25), 
+                       polynomial_data_train$y)
+plot(lasso_val, xvar = 'lambda')
+```
+
+#### Kroswalidacja
+```{r}
+set.seed(44) # podział na zbiory walidacyjne nie jest deterministyczny
+lasso_cv <- cv.glmnet(poly(polynomial_data_train$x, 25), 
+                       polynomial_data_train$y)
+plot(lasso_cv)
+```
+
+```{r}
+lasso_cv$lambda.min
+lasso_cv$lambda.1se # największa lambda, która mieści się w przedziale ufności lamda.min
+```
+
+
+```{r}
+lasso_best <- glmnet(poly(polynomial_data_train$x, 25), 
+                     polynomial_data_train$y,
+                     lambda = lasso_cv$lambda.1se)
+lasso_best$beta
+```
+```{r}
+lasso_prediction <- predict(lasso_best, poly(polynomial_data$x, 25))
+cbind.data.frame(polynomial_data, lasso_prediction) %>%
+    ggplot(aes(x)) + geom_point(aes(y = y)) +
+    geom_line(aes(y = s0))
 ```
 
 
