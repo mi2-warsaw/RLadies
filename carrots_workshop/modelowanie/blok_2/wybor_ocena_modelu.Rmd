@@ -49,7 +49,7 @@ prices_train_pred <- default_model$fitted.values
 ### Jak dobierać funkcję kosztu?
 
 
-#### Mean Square Error (MSE)
+#### Mean Squared Error (MSE)
 
 $$MSE = \frac{1}{n} \sum_{i = 1}^n(y_i - \hat{y}_i)^2.$$
 ```{r}
@@ -78,7 +78,7 @@ mae <- function(actual, predicted) {
 
 mae(actual = prices_train$sale_price, predicted = prices_train_pred)
 ```
-#### Mean Square Logistic Error (MSE)
+#### Mean Squared Logarithmic Error (MSLE)
 
 $$MSLE = \frac{1}{n} \sum_{i = 1}^n(\log(y_i) - \log(\hat{y}_i))^2.$$
 ```{r}
