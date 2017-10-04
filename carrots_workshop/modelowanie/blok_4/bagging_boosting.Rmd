@@ -1,0 +1,38 @@
+---
+title: "Ensembling: bagging i boosting"
+author: "Agnieszka Sitko"
+date: "8 października 2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
+```
+
+## Podstawowe biblioteki
+```{r}
+library(dplyr)
+library(ggplot2)
+library(caret) # ML
+library(broom) # tidy models
+```
+
+## Dane
+```{r}
+load("../data/nyc_prices.rda") # prices_train
+prices_train %>% 
+    head()
+```
+
+## Bagging
+
+
+### Lasy losowe
+
+## Boosting 
+
+### AdaBoost
+
+## Bagging vs. Boosting
+
+## Zadania
