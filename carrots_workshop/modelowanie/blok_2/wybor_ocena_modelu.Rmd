@@ -57,7 +57,7 @@ predicted_vs_observed_plot
 
 
 
-#### Mean Squared
+#### Mean Squared Error (MSE)
 
 $$MSE = \frac{1}{n} \sum_{i = 1}^n(y_i - \hat{y}_i)^2.$$
 ```{r}
@@ -68,7 +68,7 @@ mse <- function(actual, predicted) {
 mse(actual = prices_train$sale_price, predicted = prices_train_pred)
 ```
 
-#### Mean absolute error
+#### Mean Absolute Error (MAE)
 
 $$MAE = \frac{1}{n}\sum_{i=1}^n|y_i-\hat{y}_i|.$$
 
