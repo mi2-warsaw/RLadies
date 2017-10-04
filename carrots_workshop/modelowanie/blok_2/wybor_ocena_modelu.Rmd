@@ -1,0 +1,222 @@
+---
+title: "Ocena i wybór modelu"
+author: "Agnieszka Sitko"
+date: "7 października 2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
+```
+
+## Podstawowe biblioteki
+```{r}
+library(dplyr)
+library(ggplot2)
+library(caret) # ML
+library(broom) # tidy models
+```
+
+## Dane
+```{r}
+load("../data/nyc_prices.rda") # prices_train_train
+prices_train %>% 
+    head()
+```
+
+```{r}
+prices_train %>% 
+    colnames()
+```
+
+
+## Model liniowy
+```{r}
+default_model <- lm(sale_price ~ ., data = prices_train)
+default_model %>% 
+    summary()
+```
+
+## Czy mój model dobrze opisuje zbiór, na którym się uczył?
+```{r}
+prices_train_pred <- default_model$fitted.values
+```
+
+```{r}
+# zależność między R^2 a MSE
+```
+
+### Jak dobierać funkcję kosztu?
+
+
+#### Mean Square Error (MSE)
+
+$$MSE = \frac{1}{n} \sum_{i = 1}^n(y_i - \hat{y}_i)^2.$$
+```{r}
+mse <- function(actual, predicted) {
+    mean((actual - predicted) ^ 2)
+}
+
+mse(actual = prices_train$sale_price, predicted = prices_train_pred)
+```
+
+#### Mean absolute error
+
+$$MAE = \frac{1}{n}\sum_{i=1}^n|y_i-\hat{y}_i|.$$
+
+```{r}
+x <- seq(1, 3, 0.1)
+data.frame(x = x, squared = x ^ 2, abs = abs(x)) %>% 
+    reshape2::melt(id.vars = "x", var = "fun") %>% 
+    ggplot(aes(x = x, y = value, col = fun)) + geom_line()
+```
+
+```{r}
+mae <- function(actual, predicted) {
+    mean(abs(actual - predicted))
+}
+
+mae(actual = prices_train$sale_price, predicted = prices_train_pred)
+```
+#### Mean Square Logistic Error (MSE)
+
+$$MSLE = \frac{1}{n} \sum_{i = 1}^n(\log(y_i) - \log(\hat{y}_i))^2.$$
+```{r}
+plot(log, 1, 100)
+```
+
+```{r}
+msle <- function(actual, predicted) {
+    mean((log(actual) - log(predicted))^2)
+}
+
+msle(actual = prices_train$sale_price, predicted = prices_train_pred)
+```
+```{r}
+plot(prices_train_pred, prices_train$sale_price)
+```
+
+
+#### Transformacja Boxa-Coxa
+
+$$
+    y_{\lambda}=\left\{
+                \begin{array}{ll}
+                  \frac{y^\lambda - 1}{\lambda} \;\; \mathrm{dla} \;\; \lambda \neq 0, \\
+                  \log{y} \;\; \mathrm{dla} \;\; \lambda = 0.
+                \end{array}
+              \right.
+$$
+
+```{r}
+MASS::boxcox(default_model)
+```
+
+```{r}
+log_default_model <- lm(log(sale_price) ~., data = prices_train)
+```
+
+```{r}
+mse(actual = prices_train$sale_price, log_default_model$fitted.values)
+```
+
+## Czy mój model dobrze generalizuje?
+
+```{r}
+load("./data/nyc_prices_new.rda") # prices_test
+```
+
+```{r}
+test_default_pred <- predict(log_default_model, newdata = prices_test)
+```
+
+```{r}
+mse(actual = prices_test$sale_price, predicted = log_default_model$fitted.values)
+```
+
+
+### Przeuczenie vs. niedouczenie
+
+1. Stwórzmy wielomian 4 stopnia
+```{r}
+polynomial_function <- function(x) {
+    return(poly(x, degree = 4) %*% c(1, 2, -6, 9))
+}
+
+grid <- 1:100
+polynomial_data <- data.frame(x = grid, y = polynomial_function(grid)) 
+polynomial_data %>% 
+    ggplot(aes(x, y)) + geom_point()
+```
+
+
+2. Dodajmy szum
+```{r}
+polynomial_data$y <- polynomial_data$y + rnorm(length(grid), 1, 0.5) 
+polynomial_data %>% 
+    ggplot(aes(x, y)) + geom_point()
+```
+3. Wydzielmy zbiór walidacyjny.
+```{r}
+train_ids <- polynomial_data$x[1:(0.7 * nrow(polynomial_data))]
+polynomial_data$type <- "train"
+polynomial_data$type[-train_ids] <- "test"
+polynomial_data %>% 
+    ggplot(aes(x, y, color = type)) + geom_point()
+```
+
+
+4. Wyestymujmy kolejne wielomiany.
+```{r}
+degrees <- 1:25
+degrees_subset <- c(1, 2, 4, 25)
+polynomial_data_train <- polynomial_data[polynomial_data$type == "train", ]
+
+train_poly_lm <- function(degree) {
+    lm(y ~ poly(x, degree), 
+       data = polynomial_data_train)    
+}
+
+models <- lapply(degrees, train_poly_lm)
+predictions <- data.frame(sapply(models, predict, newdata = polynomial_data))
+colnames(predictions) <- paste0("degree_", degrees)
+cbind.data.frame(polynomial_data, predictions) %>%
+    reshape2::melt(id.vars = c("x", "y", "type")) %>% 
+    filter(variable %in% paste0("degree_", degrees_subset)) %>% 
+    ggplot(aes(x)) + geom_point(aes(y = y)) +
+    geom_line(aes(y = value, color = variable)) +
+    # ylim(c(min(polynomial_data$y), max(polynomial_data$y)))
+# Coś tu nie gra...
+```
+```{r}
+melt_degrees <- function(x) {
+    reshape2::melt(x, id.vars = c("x", "y", "type"))
+}
+
+mse_by_degree <- function(x) {
+    x %>% 
+        group_by(variable) %>% 
+        summarize(mse = mse(y, value)) 
+}
+    
+cbind.data.frame(polynomial_data, predictions) %>% 
+    split(polynomial_data$type) %>% 
+    lapply(melt_degrees) %>% 
+    lapply(mse_by_degree) %>% 
+    bind_rows(.id = "type") %>% 
+    ggplot(aes(variable, mse, group = type, color = type)) + 
+    geom_point() + geom_line() + 
+    theme(axis.text.x = element_text(angle = 90, hjust = 1))
+
+# coś tu nie gra...
+
+```
+
+
+
+### GIC
+```{r}
+broom::glance(default_model)
+```
+
+
