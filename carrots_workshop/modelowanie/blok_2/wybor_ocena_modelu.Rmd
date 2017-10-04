@@ -125,7 +125,7 @@ log_default_model <- lm(log(sale_price) ~., data = prices_train)
 ```
 
 ```{r}
-mse(actual = prices_train$sale_price, log_default_model$fitted.values)
+mse(actual = log(prices_train$sale_price), log_default_model$fitted.values)
 ```
 
 ## Czy mój model dobrze generalizuje?
@@ -139,7 +139,7 @@ test_default_pred <- predict(log_default_model, newdata = prices_test)
 ```
 
 ```{r}
-mse(actual = prices_test$sale_price, predicted = log_default_model$fitted.values)
+mse(actual = log(prices_test$sale_price), predicted = log_default_model$fitted.values)
 ```
 
 
@@ -275,7 +275,7 @@ lasso_best$beta
 lasso_prediction <- predict(lasso_best, poly(polynomial_data$x, 25))
 cbind.data.frame(polynomial_data, lasso_prediction) %>%
     ggplot(aes(x)) + geom_point(aes(y = y)) +
-    geom_line(aes(y = s0))
+    geom_line(aes(y = s0), color = "red")
 ```
 
 
@@ -300,3 +300,8 @@ model_stats %>%
 ```
 
 
+### Zadania
+1. Użyj LASSO do wyuczenia modelu przewidującego ceny mieszkań 
+(uwaga: użyj `model.matrix` do stworzenia argumentów odpowiedniej klasy). 
+2. Ile parametrów zostało wybranych?
+3. Czy model z regularyzacją parametrów jest lepszy niż model pierwotny?
