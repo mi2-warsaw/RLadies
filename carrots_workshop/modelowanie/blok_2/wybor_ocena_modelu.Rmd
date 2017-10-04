@@ -48,8 +48,16 @@ prices_train_pred <- default_model$fitted.values
 
 ### Jak dobierać funkcję kosztu?
 
+```{r}
+predicted_vs_observed_plot <- qplot(x = prices_train$sale_price, 
+                                    y = prices_train_pred) + 
+    geom_abline(slope = 1, intercept = 0, color = "red")
+predicted_vs_observed_plot
+```
 
-#### Mean Squared Error (MSE)
+
+
+#### Mean Squared
 
 $$MSE = \frac{1}{n} \sum_{i = 1}^n(y_i - \hat{y}_i)^2.$$
 ```{r}
@@ -93,7 +101,7 @@ msle <- function(actual, predicted) {
 msle(actual = prices_train$sale_price, predicted = prices_train_pred)
 ```
 ```{r}
-plot(prices_train_pred, prices_train$sale_price)
+predicted_vs_observed_plot
 ```
 
 
@@ -123,7 +131,7 @@ mse(actual = prices_train$sale_price, log_default_model$fitted.values)
 ## Czy mój model dobrze generalizuje?
 
 ```{r}
-load("./data/nyc_prices_new.rda") # prices_test
+load("../data/nyc_prices_new.rda") # prices_test
 ```
 
 ```{r}
@@ -158,7 +166,8 @@ polynomial_data %>%
 ```
 3. Wydzielmy zbiór walidacyjny.
 ```{r}
-train_ids <- polynomial_data$x[1:(0.7 * nrow(polynomial_data))]
+set.seed(44)
+train_ids <- sample(1:nrow(polynomial_data), size = 0.7 * nrow(polynomial_data))
 polynomial_data$type <- "train"
 polynomial_data$type[-train_ids] <- "test"
 polynomial_data %>% 
@@ -180,13 +189,13 @@ train_poly_lm <- function(degree) {
 models <- lapply(degrees, train_poly_lm)
 predictions <- data.frame(sapply(models, predict, newdata = polynomial_data))
 colnames(predictions) <- paste0("degree_", degrees)
+
 cbind.data.frame(polynomial_data, predictions) %>%
     reshape2::melt(id.vars = c("x", "y", "type")) %>% 
     filter(variable %in% paste0("degree_", degrees_subset)) %>% 
     ggplot(aes(x)) + geom_point(aes(y = y)) +
     geom_line(aes(y = value, color = variable)) +
-    # ylim(c(min(polynomial_data$y), max(polynomial_data$y)))
-# Coś tu nie gra...
+    coord_cartesian(ylim = c(min(polynomial_data$y), max(polynomial_data$y)))
 ```
 ```{r}
 melt_degrees <- function(x) {
@@ -206,17 +215,34 @@ cbind.data.frame(polynomial_data, predictions) %>%
     bind_rows(.id = "type") %>% 
     ggplot(aes(variable, mse, group = type, color = type)) + 
     geom_point() + geom_line() + 
-    theme(axis.text.x = element_text(angle = 90, hjust = 1))
+    theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+    scale_y_log10()
+```
 
-# coś tu nie gra...
+### Regularyzacja parametrów
+```{r}
 
 ```
 
 
-
 ### GIC
 ```{r}
-broom::glance(default_model)
+model_stats <- sapply(models, function(x) unlist(broom::glance(x)))
+model_stats %>% 
+    t() %>% as.data.frame() %>% 
+    select(df, logLik, AIC, BIC) %>% 
+    reshape2::melt(id.vars = "df") %>% 
+    ggplot(aes(x = df, y = value, color = variable)) + 
+    geom_point() + geom_line()
+```
+
+```{r}
+model_stats %>% 
+    t() %>% as.data.frame() %>% 
+    select(r.squared, adj.r.squared, df) %>% 
+    reshape2::melt(id.vars = "df") %>% 
+    ggplot(aes(x = df, y = value, color = variable)) + 
+    geom_point() + geom_line() 
 ```
 
 
