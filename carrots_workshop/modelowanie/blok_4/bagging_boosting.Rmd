@@ -132,27 +132,97 @@ gridExtra::grid.arrange(boosting_path[[3]], boosting_path[[4]], boosting_path[[5
     - https://arxiv.org/pdf/1603.02754.pdf, 
     - http://xgboost.readthedocs.io/en/latest/model.html
     
-To jak to zrobić w R?
+To jak to zrobić w R? Przejdźmy do prawdziwych danych.
+
+```{r}
+data(Boston, package = "MASS")
+Boston %>% head()
+?Boston
+```
+```{r}
+set.seed(123)
+train_ids <- sample(1:nrow(Boston), round(0.8 * nrow(Boston)))
+mm_boston <- Boston %>% 
+    select(-crim) %>% 
+    as.matrix()
+mm_boston_train <- mm_boston[train_ids, ]
+mm_boston_test <- mm_boston[-train_ids, ]
+mm_boston_train_label <- Boston$crim[train_ids]
+mm_boston_test_label <- Boston$crim[-train_ids]
+```
+
+Benchmanrk: regresja liniowa
+```{r}
+boston_train <- Boston[train_ids, ]
+boston_test <- Boston[-train_ids, ]
+tmp <- lm(crim ~., boston_train)
+RMSE(predict(tmp, boston_test), boston_test$crim)
+```
+
+
 ```{r}
 library(xgboost)
 # Funkcja xgboost przyjmuje tylko obiekty typu matrix, dgCMatrix i xgb.DMatrix!
-xg_poly_model <- xgboost(data = as.matrix(as.numeric(polynomial_data$x)), 
-                         label = polynomial_data$y, 
+xg_model <- xgboost(data = mm_boston_train, 
+                         label = mm_boston_train_label, 
                          nrounds = 10,
                          params = list(max_depth = 1)) 
-xg_prediction <- predict(xg_poly_model, as.matrix(as.numeric(polynomial_data$x)))
-cbind.data.frame(polynomial_data, xg_prediction) %>% 
-    ggplot(aes(x, y)) + geom_point() + 
-    geom_line(aes(y = xg_prediction), color = "blue")
 ```
 
 Jak wybrać hiperparametry?
 - liczba iteracji,
-- głębokość drzewa,
-- inne
+- inne (głębokość drzewa, krok boostingu, ...).
 Kroswalidacja!
 ```{r}
-xgb.cv()
+dtrain <- xgb.DMatrix(mm_boston_train, 
+                      label = mm_boston_train_label)
+param <- list(max_depth = 3, # maksymalna głębokość pojedynczego drzewa
+              eta = 0.1, # wielkość kroku boostingu
+              nthread = 2, # liczba wątków
+              objective = "reg:linear") # do wyboru także "binary:logistic"
+
+nrounds <- 100 # maksymalna liczba iteracji
+nfold <- 10 # liczba podzbiorów kroswalidacji
+set.seed(44)
+xgb_cv <- xgb.cv(param, dtrain, 
+                 nrounds = nrounds,
+                 nfold = nfold, 
+                 metrics = "rmse",
+                 verbose = FALSE) # nie wypisuj wyników pośrednich do konsoli
+```
+
+```{r}
+xgb_cv$evaluation_log %>% 
+    ggplot(aes(iter)) +
+    geom_ribbon(aes(ymin = train_rmse_mean - 2 * train_rmse_std, 
+                    ymax = train_rmse_mean + 2 * train_rmse_std), fill = "red", alpha = 0.3) + 
+    geom_line(aes(y = train_rmse_mean), color = "red") +
+    geom_ribbon(aes(ymin = test_rmse_mean - 2 * test_rmse_std, 
+                    ymax = test_rmse_mean + 2 * test_rmse_std), fill = "blue", alpha = 0.3) + 
+    geom_line(aes(y = test_rmse_mean), color = "blue") + 
+    ylab("RMSE")
+```
+
+```{r}
+optim_niter <- xgb_cv$evaluation_log$test_rmse_mean %>% 
+    which.min()
+xg_model <- xgboost(data = mm_boston_train, 
+                    label = mm_boston_train_label, 
+                    nrounds = optim_niter,
+                    params = list(max_depth = 2), 
+                    verbose = FALSE) 
+
+RMSE(predict(xg_model, mm_boston_test), mm_boston_test_label)
+```
+
+### Interpretacja i wizualizacja boostingu
+```{r}
+importance_matrix <- xgb.importance(colnames(mm_boston_train), model = xg_model)
+importance_matrix
+```
+
+```{r}
+xgb.ggplot.importance(importance_matrix)
 ```
 
 
