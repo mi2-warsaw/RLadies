@@ -35,6 +35,8 @@ prices_train %>%
 - w każdym kroku skupiamy się na tych obserwacjach, które poprzednio nienajlepiej dopasowaliśmy.
 
 ### Boosting resztowy
+- problem: regresja, 
+- wyuczamy kolejne modele na resztach powstałych z sumy poprzednich modeli.
 
 Przykład: wielomian IV stopnia.
 
@@ -115,11 +117,44 @@ gridExtra::grid.arrange(boosting_path[[3]], boosting_path[[4]], boosting_path[[5
                         boosting_path[[9]], boosting_path[[10]], nrow = 2)
 ```
 
-```{r}
+### AdaBoost (Adaptive boosting)
+- problem: klasyfikacja,
+- w każdym kroku obserwacje źle sklasyfikowane dostają wyższe wagi w funkcji celu.
 
+![adaboost](./adaboost.png)
+
+- więcej: https://cseweb.ucsd.edu/~yfreund/papers/adaboost.pdf
+
+### XGBoost (Extreme Gradient Boosting)
+- przypomina gradient descent,
+- zaimplementowany w R w bibliotece `xgboost` i najczęściej używany,
+- więcej: 
+    - https://arxiv.org/pdf/1603.02754.pdf, 
+    - http://xgboost.readthedocs.io/en/latest/model.html
+    
+To jak to zrobić w R?
+```{r}
+library(xgboost)
+# Funkcja xgboost przyjmuje tylko obiekty typu matrix, dgCMatrix i xgb.DMatrix!
+xg_poly_model <- xgboost(data = as.matrix(as.numeric(polynomial_data$x)), 
+                         label = polynomial_data$y, 
+                         nrounds = 10,
+                         params = list(max_depth = 1)) 
+xg_prediction <- predict(xg_poly_model, as.matrix(as.numeric(polynomial_data$x)))
+cbind.data.frame(polynomial_data, xg_prediction) %>% 
+    ggplot(aes(x, y)) + geom_point() + 
+    geom_line(aes(y = xg_prediction), color = "blue")
 ```
 
-### AdaBoost
+Jak wybrać hiperparametry?
+- liczba iteracji,
+- głębokość drzewa,
+- inne
+Kroswalidacja!
+```{r}
+xgb.cv()
+```
+
 
 ## Bagging vs. Boosting
 
