@@ -1,11 +1,10 @@
 library("faraway")
 library("dplyr")
-library('magrittr')
 library("ggplot2")
 library("rpart")
 
 dane <- read.csv('./data/titanic.csv')
-dane %<>% select(-c(PassengerId,Name, Ticket, Cabin))
+dane <- dane %>% select(-c(PassengerId,Name, Ticket, Cabin))
 head(dane)
 
 table(dane$Survived)
@@ -17,7 +16,7 @@ apply(dane, 2, FUN = function(x){
 
 m.Age <- median(dane$Age, na.rm = TRUE)
 m.Age
-dane %<>% mutate(Age = if_else(is.na(Age),m.Age ,Age))
+dane <- dane %>% mutate(Age = if_else(is.na(Age),m.Age ,Age))
 
 dane <- model.matrix(~.-1 , data=dane) %>% data.frame() %>% 
   select(-c(EmbarkedC,Sexmale))
@@ -31,7 +30,7 @@ test <- dane[-los,]
 check_class <- function(true, pred){
   t <- table(true, pred)
   results <- c(sum(diag(t))/sum(t), t[2,2]/sum(t[2,]), t[2,2]/sum(t[,2]), t[1,1]/sum(t[,1]))
-  names(results) <- c("% popr. odp.", "czu?o??", "precyzja", "specyficzno??")
+  names(results) <- c("% popr. odp.", "czułość", "precyzja", "specyficzność")
   results
 }
 
@@ -70,8 +69,8 @@ predict(logit.bic, data.frame(Pclass=1, Sexfemale = 0,Age = 24,
 
 probs <- predict(logit.bic, test,type='response')
 
-qplot(probs) + ggtitle("Histogram uzyskanych prawdopodobie?stw przynale?no?ci do klasy 1") +
-  labs(y = "Cz?sto??", x = "Prawdopodobie?stwo") + theme_minimal() +
+qplot(probs) + ggtitle("Histogram uzyskanych prawdopodobieństw przynależności do klasy 1") +
+  labs(y = "Częstość", x = "Prawdopodobieństwo") + theme_minimal() +
   theme(axis.title.x = element_text(size = 15, angle = 0, face = "italic"), 
         axis.title.y = element_text(size = 15, angle = 90, face = "italic")) +
   theme(legend.title = element_text(size = 14, face = "bold")) +
@@ -86,7 +85,7 @@ dane <- read.table("./data/earthquake.txt", h = T)
 
 
 ggplot(data = dane, aes(x = body, y = surface, col = popn))+
-  geom_point(size = 2.5) + theme_minimal() + ggtitle("Przyk?ad danych liniowo separowalnych") +
+  geom_point(size = 2.5) + theme_minimal() + ggtitle("Przykład danych liniowo separowalnych") +
   theme(axis.title.x = element_text(size = 15, angle = 0, face = "italic"), 
         axis.title.y = element_text(size = 15, angle = 90, face = "italic")) +
   theme(legend.title = element_text(size = 14, face = "bold")) + theme(title = element_text(size = 20)) +
@@ -101,9 +100,10 @@ model <- glm(popn ~ ., data = dane, family = "binomial")
 # Drzewa klasyfikacyjne
 model.tree <- rpart(as.factor(popn) ~ ., data = dane, minsplit = 5)
 
+par(mar = c(0, 1, 0, 1))
 plot(model.tree)
 text(model.tree)
-
+par(mar = c(4, 4, 4, 4))
 
 xp <- seq(4.5, 6.5, length = 50)
 yp <- seq(3.5, 6.5, length = 50)
@@ -117,7 +117,7 @@ ggplot() + xlim(c(4.4, 6.6)) + ylim(c(3.4, 6.8)) + theme_minimal() +
                aes(x = body, y = surface, z = pred2), bins = 1, col = "black", 
                linetype = 1, size = 1.2, alpha = 0.5) + 
   geom_point(data = dane, aes(x = body, y = surface, col = popn), size = 2) + 
-  xlab("body") + ylab("surface") + ggtitle("Przyk?ad klasyfikacji za pomoc? drzewa") +
+  xlab("body") + ylab("surface") + ggtitle("Przykład klasyfikacji za pomocą drzewa") +
   theme(plot.title = element_text(face = "bold", size = 20)) + 
   theme(axis.title.x = element_text(size = 18, angle = 0, face = "italic"), 
         axis.title.y = element_text(size = 18, angle = 90, face = "italic")) +
