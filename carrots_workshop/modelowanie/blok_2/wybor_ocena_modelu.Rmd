@@ -278,10 +278,58 @@ cbind.data.frame(polynomial_data, lasso_prediction) %>%
     geom_line(aes(y = s0), color = "red")
 ```
 
+#### Ridge 
+
+$$\min_{\hat{\beta}}\frac{1}{n} \sum_{i = 1}^n(y_i - X\hat{\beta})^2 
+    \;\; \mathrm{dla} \;\; 
+\sum_{j = 1}^k|\beta_j|^2 \leq t.$$
+
+```{r}
+ridge_val <- glmnet(poly(polynomial_data_train$x, 25), 
+                       polynomial_data_train$y, 
+                    alpha = 0)
+plot(ridge_val, xvar = 'lambda')
+```
+
+```{r}
+set.seed(44)
+ridge_cv <- cv.glmnet(poly(polynomial_data_train$x, 25), 
+                      polynomial_data_train$y,
+                      alpha = 0)
+plot(ridge_cv)
+```
+
+```{r}
+ridge_cv$lambda.min
+ridge_cv$lambda.1se # największa lambda, która mieści się w przedziale ufności lamda.min
+```
+
+
+```{r}
+ridge_best <- glmnet(poly(polynomial_data_train$x, 25), 
+                     polynomial_data_train$y,
+                     lambda = ridge_cv$lambda.1se,
+                     alpha = 0)
+ridge_best$beta
+```
+```{r}
+ridge_prediction <- predict(ridge_best, poly(polynomial_data$x, 25))
+cbind.data.frame(polynomial_data, ridge_prediction) %>%
+    ggplot(aes(x)) + geom_point(aes(y = y)) +
+    geom_line(aes(y = s0), color = "red")
+```
+
+
+## Broom::glance
+```{r}
+my_model <- models[[25]]
+broom::glance(my_model)
+```
+
 
 ### GIC
 ```{r}
-model_stats <- sapply(models, function(x) unlist(broom::glance(x)))
+model_stats <- sapply(models, function(x) unlist(glance(x)))
 model_stats %>% 
     t() %>% as.data.frame() %>% 
     select(df, logLik, AIC, BIC) %>% 
@@ -289,19 +337,16 @@ model_stats %>%
     ggplot(aes(x = df, y = value, color = variable)) + 
     geom_point() + geom_line()
 ```
-
 ```{r}
-model_stats %>% 
-    t() %>% as.data.frame() %>% 
-    select(r.squared, adj.r.squared, df) %>% 
-    reshape2::melt(id.vars = "df") %>% 
-    ggplot(aes(x = df, y = value, color = variable)) + 
-    geom_point() + geom_line() 
+step_reg <- MASS::stepAIC(my_model, 
+                          k = log(nrow(polynomial_data_train)), 
+                          direction = "both")
+step_reg$coefficients
 ```
 
 
 ### Zadania
 1. Użyj LASSO do wyuczenia modelu przewidującego ceny mieszkań 
 (uwaga: użyj `model.matrix` do stworzenia argumentów odpowiedniej klasy). 
-2. Ile parametrów zostało wybranych?
-3. Czy model z regularyzacją parametrów jest lepszy niż model pierwotny?
+2. Ile parametrów zostało wybranych? Czy model z regularyzacją parametrów jest lepszy niż model pierwotny?
+3. Użyj regresji wstecznej do modelu cen mieszkań.
