@@ -14,7 +14,37 @@ knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
 library(dplyr)
 library(ggplot2)
 library(caret) # ML
-library(broom) # tidy models
+library(MASS) # Boston
+```
+
+## Drzewa regresyjne
+Słowo wstępu: drzewa regresyjne. http://chem-eng.utoronto.ca/~datamining/dmc/decision_tree_reg.htm
+```{r}
+simple_example <- data.frame(
+    Atmosfera = c("Deszcz", "Deszcz", "Słońce", "Słońce", "Chmury", "Chmury"),
+    Temperatura = c("Gorąco", "Zimno", "Zimno", "Gorąco", "Gorąco", "Zimno"),
+    Czas = c(3, 3.5, 5, 7, 6, 3)
+)
+simple_example
+```
+```{r}
+sd(simple_example$Czas)
+```
+```{r}
+grupuj_po_atmosferze <- simple_example %>% 
+    group_by(Atmosfera) %>% 
+    summarise(Sd = sd(Czas), Liczba = n())
+grupuj_po_atmosferze
+```
+
+```{r}
+weighted.mean(grupuj_po_atmosferze$Sd, grupuj_po_atmosferze$Liczba)
+```
+```{r}
+grupuj_po_temperaturze <- simple_example %>% 
+    group_by(Temperatura) %>% 
+    summarise(Sd = sd(Czas), Liczba = n())
+weighted.mean(grupuj_po_temperaturze$Sd, grupuj_po_temperaturze$Liczba)
 ```
 
 ## Dane 
@@ -30,7 +60,7 @@ Boston %>% head()
 set.seed(123)
 train_ids <- sample(1:nrow(Boston), round(0.8 * nrow(Boston)))
 mm_boston <- Boston %>% 
-    select(-medv) %>% 
+    dplyr::select(-medv) %>% 
     as.matrix()
 mm_boston_train <- mm_boston[train_ids, ]
 mm_boston_test <- mm_boston[-train_ids, ]
@@ -45,8 +75,6 @@ boston_test <- Boston[-train_ids, ]
 linear_boston <- lm(medv ~., boston_train)
 RMSE(predict(linear_boston, boston_test), boston_test$medv)
 ```
-## Drzewa regresyjne
-Słowo wstępu: drzewa regresyjne. http://chem-eng.utoronto.ca/~datamining/dmc/decision_tree_reg.htm
 
 ## Bagging (Bootstrap aggregating)
 
@@ -67,7 +95,9 @@ Algorytm:
 ```{r}
 set.seed(2017) # bootstrap i losowanie zmiennych nie są deterministyczne 
 library(randomForest)
-forest <- randomForest(mm_boston_train, mm_boston_train_label, localImp = TRUE)
+forest <- randomForest(mm_boston_train, mm_boston_train_label, 
+                       localImp = TRUE) 
+forest
 ```
 
 ### OOB (Out-of-Bag) Error 
@@ -93,13 +123,13 @@ importance(forest)
     add_rownames(var = "variable") %>% 
     ggplot(aes(reorder(variable, `%IncMSE`), `%IncMSE`)) + 
     geom_bar(stat = 'identity', fill = 'navy') + coord_flip()
-    
 ```
 
 #### Czas na randomForestExplainer!
 https://cran.r-project.org/web/packages/randomForestExplainer/vignettes/randomForestExplainer.html
 ```{r}
 min_depth_frame <- min_depth_distribution(forest)
+min_depth_frame
 ```
 
 ```{r}
@@ -152,7 +182,8 @@ cbind.data.frame(polynomial_data, y1_prediction) %>%
 ```{r}
 errors <- polynomial_data$y - y1_prediction
 data.frame(x = polynomial_data$x, errors) %>% 
-    ggplot(aes(x, errors)) + geom_point(color = "red")
+    ggplot(aes(x, errors)) + geom_point(color = "red") +
+    geom_hline(yintercept = 0)
 ```
 3. Wyucz model na resztach
 ```{r}
