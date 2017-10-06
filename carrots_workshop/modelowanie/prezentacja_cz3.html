@@ -1,0 +1,760 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="generator" content="pandoc">
+  <meta name="author" content="" />
+  <title>RLadies - Modelowanie</title>
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui">
+  <link rel="stylesheet" href="prezentacja_RLadies_files/reveal.js-3.3.0.1/css/reveal.css"/>
+
+
+
+<link rel="stylesheet" href="prezentacja_RLadies_files/reveal.js-3.3.0.1/css/theme/night.css" id="theme">
+
+<style type="text/css">
+.reveal section img {
+  background: rgba(255, 255, 255, 0.85);
+}
+</style>
+
+  <!-- some tweaks to reveal css -->
+  <style type="text/css">
+    .reveal h1 { font-size: 2.0em; }
+    .reveal h2 { font-size: 1.5em;  }
+    .reveal h3 { font-size: 1.25em;	}
+    .reveal h4 { font-size: 1em;	}
+
+    .reveal .slides>section,
+    .reveal .slides>section>section {
+      padding: 0px 0px;
+    }
+
+
+
+    .reveal table {
+      border-width: 1px;
+      border-spacing: 2px;
+      border-style: dotted;
+      border-color: gray;
+      border-collapse: collapse;
+      font-size: 0.7em;
+    }
+
+    .reveal table th {
+      border-width: 1px;
+      padding-left: 10px;
+      padding-right: 25px;
+      font-weight: bold;
+      border-style: dotted;
+      border-color: gray;
+    }
+
+    .reveal table td {
+      border-width: 1px;
+      padding-left: 10px;
+      padding-right: 25px;
+      border-style: dotted;
+      border-color: gray;
+    }
+
+
+  </style>
+
+    <style type="text/css">code{white-space: pre;}</style>
+
+
+<!-- Printing and PDF exports -->
+<script id="paper-css" type="application/dynamic-css">
+
+/* Default Print Stylesheet Template
+   by Rob Glazebrook of CSSnewbie.com
+   Last Updated: June 4, 2008
+
+   Feel free (nay, compelled) to edit, append, and
+   manipulate this file as you see fit. */
+
+
+@media print {
+
+	/* SECTION 1: Set default width, margin, float, and
+	   background. This prevents elements from extending
+	   beyond the edge of the printed page, and prevents
+	   unnecessary background images from printing */
+	html {
+		background: #fff;
+		width: auto;
+		height: auto;
+		overflow: visible;
+	}
+	body {
+		background: #fff;
+		font-size: 20pt;
+		width: auto;
+		height: auto;
+		border: 0;
+		margin: 0 5%;
+		padding: 0;
+		overflow: visible;
+		float: none !important;
+	}
+
+	/* SECTION 2: Remove any elements not needed in print.
+	   This would include navigation, ads, sidebars, etc. */
+	.nestedarrow,
+	.controls,
+	.fork-reveal,
+	.share-reveal,
+	.state-background,
+	.reveal .progress,
+	.reveal .backgrounds {
+		display: none !important;
+	}
+
+	/* SECTION 3: Set body font face, size, and color.
+	   Consider using a serif font for readability. */
+	body, p, td, li, div {
+		font-size: 20pt!important;
+		font-family: Georgia, "Times New Roman", Times, serif !important;
+		color: #000;
+	}
+
+	/* SECTION 4: Set heading font face, sizes, and color.
+	   Differentiate your headings from your body text.
+	   Perhaps use a large sans-serif for distinction. */
+	h1,h2,h3,h4,h5,h6 {
+		color: #000!important;
+		height: auto;
+		line-height: normal;
+		font-family: Georgia, "Times New Roman", Times, serif !important;
+		text-shadow: 0 0 0 #000 !important;
+		text-align: left;
+		letter-spacing: normal;
+	}
+	/* Need to reduce the size of the fonts for printing */
+	h1 { font-size: 28pt !important;  }
+	h2 { font-size: 24pt !important; }
+	h3 { font-size: 22pt !important; }
+	h4 { font-size: 22pt !important; font-variant: small-caps; }
+	h5 { font-size: 21pt !important; }
+	h6 { font-size: 20pt !important; font-style: italic; }
+
+	/* SECTION 5: Make hyperlinks more usable.
+	   Ensure links are underlined, and consider appending
+	   the URL to the end of the link for usability. */
+	a:link,
+	a:visited {
+		color: #000 !important;
+		font-weight: bold;
+		text-decoration: underline;
+	}
+	/*
+	.reveal a:link:after,
+	.reveal a:visited:after {
+		content: " (" attr(href) ") ";
+		color: #222 !important;
+		font-size: 90%;
+	}
+	*/
+
+
+	/* SECTION 6: more reveal.js specific additions by @skypanther */
+	ul, ol, div, p {
+		visibility: visible;
+		position: static;
+		width: auto;
+		height: auto;
+		display: block;
+		overflow: visible;
+		margin: 0;
+		text-align: left !important;
+	}
+	.reveal pre,
+	.reveal table {
+		margin-left: 0;
+		margin-right: 0;
+	}
+	.reveal pre code {
+		padding: 20px;
+		border: 1px solid #ddd;
+	}
+	.reveal blockquote {
+		margin: 20px 0;
+	}
+	.reveal .slides {
+		position: static !important;
+		width: auto !important;
+		height: auto !important;
+
+		left: 0 !important;
+		top: 0 !important;
+		margin-left: 0 !important;
+		margin-top: 0 !important;
+		padding: 0 !important;
+		zoom: 1 !important;
+
+		overflow: visible !important;
+		display: block !important;
+
+		text-align: left !important;
+		-webkit-perspective: none;
+		   -moz-perspective: none;
+		    -ms-perspective: none;
+		        perspective: none;
+
+		-webkit-perspective-origin: 50% 50%;
+		   -moz-perspective-origin: 50% 50%;
+		    -ms-perspective-origin: 50% 50%;
+		        perspective-origin: 50% 50%;
+	}
+	.reveal .slides section {
+		visibility: visible !important;
+		position: static !important;
+		width: auto !important;
+		height: auto !important;
+		display: block !important;
+		overflow: visible !important;
+
+		left: 0 !important;
+		top: 0 !important;
+		margin-left: 0 !important;
+		margin-top: 0 !important;
+		padding: 60px 20px !important;
+		z-index: auto !important;
+
+		opacity: 1 !important;
+
+		page-break-after: always !important;
+
+		-webkit-transform-style: flat !important;
+		   -moz-transform-style: flat !important;
+		    -ms-transform-style: flat !important;
+		        transform-style: flat !important;
+
+		-webkit-transform: none !important;
+		   -moz-transform: none !important;
+		    -ms-transform: none !important;
+		        transform: none !important;
+
+		-webkit-transition: none !important;
+		   -moz-transition: none !important;
+		    -ms-transition: none !important;
+		        transition: none !important;
+	}
+	.reveal .slides section.stack {
+		padding: 0 !important;
+	}
+	.reveal section:last-of-type {
+		page-break-after: avoid !important;
+	}
+	.reveal section .fragment {
+		opacity: 1 !important;
+		visibility: visible !important;
+
+		-webkit-transform: none !important;
+		   -moz-transform: none !important;
+		    -ms-transform: none !important;
+		        transform: none !important;
+	}
+	.reveal section img {
+		display: block;
+		margin: 15px 0px;
+		background: rgba(255,255,255,1);
+		border: 1px solid #666;
+		box-shadow: none;
+	}
+
+	.reveal section small {
+		font-size: 0.8em;
+	}
+
+}  
+</script>
+
+
+<script id="pdf-css" type="application/dynamic-css">
+    
+/**
+ * This stylesheet is used to print reveal.js
+ * presentations to PDF.
+ *
+ * https://github.com/hakimel/reveal.js#pdf-export
+ */
+
+* {
+	-webkit-print-color-adjust: exact;
+}
+
+body {
+	margin: 0 auto !important;
+	border: 0;
+	padding: 0;
+	float: none !important;
+	overflow: visible;
+}
+
+html {
+	width: 100%;
+	height: 100%;
+	overflow: visible;
+}
+
+/* Remove any elements not needed in print. */
+.nestedarrow,
+.reveal .controls,
+.reveal .progress,
+.reveal .playback,
+.reveal.overview,
+.fork-reveal,
+.share-reveal,
+.state-background {
+	display: none !important;
+}
+
+h1, h2, h3, h4, h5, h6 {
+	text-shadow: 0 0 0 #000 !important;
+}
+
+.reveal pre code {
+	overflow: hidden !important;
+	font-family: Courier, 'Courier New', monospace !important;
+}
+
+ul, ol, div, p {
+	visibility: visible;
+	position: static;
+	width: auto;
+	height: auto;
+	display: block;
+	overflow: visible;
+	margin: auto;
+}
+.reveal {
+	width: auto !important;
+	height: auto !important;
+	overflow: hidden !important;
+}
+.reveal .slides {
+	position: static;
+	width: 100%;
+	height: auto;
+
+	left: auto;
+	top: auto;
+	margin: 0 !important;
+	padding: 0 !important;
+
+	overflow: visible;
+	display: block;
+
+	-webkit-perspective: none;
+	   -moz-perspective: none;
+	    -ms-perspective: none;
+	        perspective: none;
+
+	-webkit-perspective-origin: 50% 50%; /* there isn't a none/auto value but 50-50 is the default */
+	   -moz-perspective-origin: 50% 50%;
+	    -ms-perspective-origin: 50% 50%;
+	        perspective-origin: 50% 50%;
+}
+
+.reveal .slides section {
+	page-break-after: always !important;
+
+	visibility: visible !important;
+	position: relative !important;
+	display: block !important;
+	position: relative !important;
+
+	margin: 0 !important;
+	padding: 0 !important;
+	box-sizing: border-box !important;
+	min-height: 1px;
+
+	opacity: 1 !important;
+
+	-webkit-transform-style: flat !important;
+	   -moz-transform-style: flat !important;
+	    -ms-transform-style: flat !important;
+	        transform-style: flat !important;
+
+	-webkit-transform: none !important;
+	   -moz-transform: none !important;
+	    -ms-transform: none !important;
+	        transform: none !important;
+}
+
+.reveal section.stack {
+	margin: 0 !important;
+	padding: 0 !important;
+	page-break-after: avoid !important;
+	height: auto !important;
+	min-height: auto !important;
+}
+
+.reveal img {
+	box-shadow: none;
+}
+
+.reveal .roll {
+	overflow: visible;
+	line-height: 1em;
+}
+
+/* Slide backgrounds are placed inside of their slide when exporting to PDF */
+.reveal section .slide-background {
+	display: block !important;
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
+	z-index: -1;
+}
+
+/* All elements should be above the slide-background */
+.reveal section>* {
+	position: relative;
+	z-index: 1;
+}
+
+/* Display slide speaker notes when 'showNotes' is enabled */
+.reveal .speaker-notes-pdf {
+	display: block;
+	width: 100%;
+	max-height: none;
+	left: auto;
+	top: auto;
+	z-index: 100;
+}
+
+/* Display slide numbers when 'slideNumber' is enabled */
+.reveal .slide-number-pdf {
+	display: block;
+	position: absolute;
+	font-size: 14px;
+}
+
+</script>
+
+
+<script>
+var style = document.createElement( 'style' );
+style.type = 'text/css';
+var style_script_id = window.location.search.match( /print-pdf/gi ) ? 'pdf-css' : 'paper-css';
+var style_script = document.getElementById(style_script_id).text;
+style.innerHTML = style_script;
+document.getElementsByTagName('head')[0].appendChild(style);
+</script>
+
+    <link href="prezentacja_RLadies_files/font-awesome-4.5.0/css/font-awesome.min.css" rel="stylesheet" />
+</head>
+<body>
+  <div class="reveal">
+    <div class="slides">
+
+<section>
+    <h1 class="title">RLadies - Modelowanie</h1>
+  <h1 class="subtitle"><small> Wstęp do klasyfikacji <br> <br> Aleksandra Brodecka    </small></h1>
+    <h2 class="author"><small>              <a href='https://github.com/abrodecka'><i class='fa fa-github'></i></a>  <a href='mailto:aleksandrabrodecka@gmail.com'><i class='fa fa-envelope-o'></i></a>  <a href='https://www.linkedin.com/in/aleksandra-brodecka-92831511a/'><i class='fa fa-linkedin'></i></a>                  </small><br></h2>
+    <h3 class="date">6 Października, 2017</h3>
+</section>
+
+<section><section id="plan-warsztatow" class="titleslide slide level1"><h1>Plan warsztatów</h1></section><section id="plan-warsztatow-1" class="slide level2">
+<h1>Plan warsztatów</h1>
+<p><br> <br></p>
+<ul>
+<li><p>Wstęp do klasyfikacji</p></li>
+<li><p>Regresja logistyczna</p></li>
+<li><p>Klasyfikacja za pomocą drzew</p></li>
+</ul>
+</section></section>
+<section><section id="wstep-do-klasyfikacji" class="titleslide slide level1"><h1>Wstęp do klasyfikacji</h1></section><section id="postac-problemu" class="slide level2">
+<h1>Postać problemu</h1>
+<br>
+<p align="left">
+<span class="math inline">\((x_1, y_1), (x_2, y_2), \ldots,(x_n, y_n)\)</span>, gdzie:
+</p>
+<p align="left">
+<ul>
+<li><p><span class="math inline">\(x_i\)</span> oznacza i-tą obserwację, <span class="math inline">\(x \in \chi\)</span>, <span class="math inline">\(x_i = (x_i^{(1)},x_i^{(2)}, \ldots, x_i^{(p)})\)</span></p></li>
+<li><p><span class="math inline">\(y_i\)</span> oznacza etykietę klasy, <span class="math inline">\(y \in G\)</span></p></li>
+</ul>
+</p>
+<p align="left">
+Zadanie klasyfikacji pod nadzorem polega na podaniu reguły decyzyjnej, (zwanej także regułą dyskryminacyjną lub klasyfikacyjną) przypisującej dowolnej obserwacji <span class="math inline">\(x \in \chi\)</span> przynależność do klasy ze zbioru <span class="math inline">\(G\)</span>; zadanie polega więc na podaniu odwzorowania: <span class="math display">\[ d(x): \quad X \rightarrow G.\]</span>
+</p>
+</section><section id="miary" class="slide level2">
+<h1>Miary</h1>
+<table style="width:96%;">
+<colgroup>
+<col style="width: 26%" />
+<col style="width: 34%" />
+<col style="width: 34%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th></th>
+<th style="text-align: center;">Osoba zaklasyfikowana jako zdrowa</th>
+<th style="text-align: left;">Osoba zaklasyfikowana jako chora</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Osoba zdrowa</td>
+<td style="text-align: center;">TN</td>
+<td style="text-align: left;">FP</td>
+</tr>
+<tr class="even">
+<td>Osoba chora</td>
+<td style="text-align: center;">FN</td>
+<td style="text-align: left;">TP</td>
+</tr>
+</tbody>
+</table>
+<p><br></p>
+<table style="width:96%;">
+<colgroup>
+<col style="width: 26%" />
+<col style="width: 34%" />
+<col style="width: 34%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th></th>
+<th style="text-align: center;">Osoba zaklasyfikowana jako zdrowa</th>
+<th style="text-align: left;">Osoba zaklasyfikowana jako chora</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Osoba zdrowa</td>
+<td style="text-align: center;">176</td>
+<td style="text-align: left;">24</td>
+</tr>
+<tr class="even">
+<td>Osoba chora</td>
+<td style="text-align: center;">3</td>
+<td style="text-align: left;">97</td>
+</tr>
+</tbody>
+</table>
+<br>
+<p style="color:#a67e3e;" , align="left">
+Czułość = <span class="math inline">\(\frac{TP}{TP+FN}\)</span>                              Specyficzność = <span class="math inline">\(\frac{TN}{TN+FP}\)</span> <br>
+</p>
+<p style="color:#a67e3e;" , align="left">
+Precyzja = <span class="math inline">\(\frac{TP}{TP+FP}\)</span>
+</p>
+</section></section>
+<section><section id="regresja-logistyczna" class="titleslide slide level1"><h1>Regresja logistyczna</h1></section><section id="postac-modelu" class="slide level2">
+<h1>Postać modelu</h1>
+<br>
+<p style="color:#a67e3e;" , align="left">
+Regresja liniowa:
+</p>
+<br> <span class="math inline">\(y_i =\beta^Tx_{i} + \epsilon_i\)</span> <br>
+<p style="color:#a67e3e;" , align="left">
+Regresja logistyczna:
+</p>
+<p><span class="math inline">\(\pi_i = h(\beta^Tx_{i}) + \epsilon_i\)</span> <br> <br> <span class="math inline">\(y_i \sim Bernoulli(1, \pi_i) \Rightarrow E(y_i) = \pi_i\)</span></p>
+<br> <small>
+<p align="left">
+Najczęsciej <span class="math inline">\(h(z) = \frac{\exp(z)}{1 + \exp(z)}\)</span>, wtedy funkcja łącząca <span class="math inline">\(g(\pi_i)=logit(\pi_i)=\log(\frac{\pi_i}{1-\pi_i}) = \beta^Tx_i\)</span>. Inne przykłady: <span class="math inline">\(g(\pi_i) = cloglog(\pi_i) = \log(-\log(1-\pi_i)\)</span> lub <span class="math inline">\(g(\pi_i) = probit(\pi_i) = \phi^{-1}(\pi_i)\)</span>
+</p>
+<p></small></p>
+</section><section id="funkcja-wiarygodnosci" class="slide level2">
+<h1>Funkcja wiarygodności</h1>
+<p><br></p>
+<p><span class="math inline">\(L(\beta) = \prod_{i=1}^N \pi_i^{y_i} (1 - \pi_i)^{1-y_i}\)</span></p>
+<br>
+<p style="color:#a67e3e;" , align="left">
+Pojedynczy składnik:
+</p>
+<p align="left">
+Zdarzenie wystąpiło: <span class="math inline">\(y_i = 1\)</span> otrzymujemy: <span class="math display">\[\pi_i^1 \cdot (1-\pi_i)^0 = \pi_i\]</span>
+</p>
+<br>
+<p align="left">
+Zdarzenie nie wystąpiło: <span class="math inline">\(y_i = 0\)</span> otrzymujemy: <span class="math display">\[\pi_i^0 \cdot (1-\pi_i)^1 = 1 - \pi_i\]</span>
+</p>
+</section><section id="funkcja-wiarygodnosci-1" class="slide level2">
+<h1>Funkcja wiarygodności</h1>
+<p><br></p>
+<p><span class="math display">\[log(L) =l(\beta) =  \sum_{i=1}^n y_i \log \pi_i + (1-y_i) \log(1-\pi_i)\]</span></p>
+<span class="math display">\[U(\beta) = \frac{\partial l }{\partial \beta} = \sum_{i=1}^n x_i(y_i - \pi_i)\]</span>
+<p align="left">
+Otrzymujemy rozwiązanie :
+</p>
+<span class="math display">\[  \sum_{i=1}^n x_i y_i = \sum_{i=1}^n x_i \pi_i \]</span>
+<p align="left">
+Rozwiązanie nie ma jawnego wyniku, należy sięgnąć po metody iteracyjne np. Newtona-Rapsona.
+</p>
+</section><section id="interpretacja-modelu" class="slide level2">
+<h1>Interpretacja modelu</h1>
+<br>
+<p align="left">
+Niech <span class="math inline">\(logit(\pi_i) =\beta_0 + \beta_1x\)</span> oraz <span class="math inline">\(logit(\pi_k) =\beta_0 + \beta_1(x+1)\)</span>.
+</p>
+<p align="left">
+Wtedy:
+</p>
+<p align="left">
+<p><span class="math inline">\(logit(\pi_i) - logit(\pi_k) = \beta_1\)</span> oraz <span class="math inline">\(\exp \beta_1 = \exp \Big( \log \frac{\pi_i}{1-\pi_i} - \log \frac{\pi_k}{1-\pi_k} \Big) = \frac{\pi_i}{1-\pi_i} / \frac{\pi_k}{1-\pi_k}\)</span></p>
+</p>
+<br>
+<p style="color:#a67e3e;" , align="left">
+Iloraz szans przy zmianie zmiennnych objaśniających o jednostkę wynosi <span class="math inline">\(e^\beta\)</span>
+</p>
+</section></section>
+<section><section id="klasyfikacja-za-pomoca-drzew" class="titleslide slide level1"><h1>Klasyfikacja za pomocą drzew</h1></section><section id="przykad-klasyfikacji" class="slide level2">
+<h1>Przykład klasyfikacji</h1>
+<p><img src="tree.png" width="820" /></p>
+</section><section id="zasady-klasyfikacji" class="slide level2">
+<h1>Zasady klasyfikacji</h1>
+<br>
+<p style="color:#a67e3e;" , align="left">
+Obserwacje w węźle <span class="math inline">\(m\)</span> klasyfikujemy do klasy:
+</p>
+<span class="math inline">\(k(m)=\arg \max_k \hat{p}_{mk}\)</span> <br>
+<p align="left">
+gdzie <span class="math inline">\(\hat{p}_{mk}\)</span> to oszacowanie prawdopodobieństwa przynależności obserwacji w więźle <span class="math inline">\(m\)</span> do klasy <span class="math inline">\(k\)</span>.
+</p>
+<br>
+<p align="left">
+Niech liczność próby uczącej, która trafiła do węzła <span class="math inline">\(m\)</span> wynosi <span class="math inline">\(n_m\)</span>, wtedy:
+</p>
+<p><span class="math inline">\(\hat{p}_{mk} = \frac{1}{n_m}\sum_{x_i \in R_m} I(y_i = k) = \frac{n_{mk}}{n_m}\)</span></p>
+</section><section id="miary-roznorodnosci" class="slide level2">
+<h1>Miary różnorodności</h1>
+<br>
+<p style="color:#a67e3e;" , align="left">
+Proporcja błędnych klasyfikacji:
+</p>
+<span class="math display">\[\frac{1}{n_m} \sum_{i \in R_m} I(y_i \neq k(m)) = 1 - \hat{p}_{mk(m)}\]</span>
+<p style="color:#a67e3e;" , align="left">
+Indeks Giniego:
+</p>
+<span class="math display">\[\sum_{k = 1}^g \hat{p}_{mk}(1-\hat{p}_{mk})\]</span>
+<p style="color:#a67e3e;" , align="left">
+Entropia:
+</p>
+<p><span class="math display">\[- \sum_{k=1}^g \hat{p}_{mk} \log \hat{p}_{mk}\]</span></p>
+</section><section id="miary-roznorodnosci-1" class="slide level2">
+<h1>Miary różnorodności</h1>
+<br>
+<p align="left">
+Niech <span class="math inline">\(\hat{p}_L = \frac{n_{mL}}{n_m}, \hat{p}_R = 1 - \hat{p}_L\)</span>,
+</p>
+<p align="left">
+gdzie <span class="math inline">\(n_{mL}\)</span> oznacza liczbę elementów próby uczącej, która przeszła z m-tego węzła do jego dziecka po lewej stronie.
+</p>
+<p align="left">
+Miara różnorodności klas w dzieciach węzła <span class="math inline">\(m\)</span> przyjmujemy wielkość:
+</p>
+<p><span class="math display">\[Q_{m_L, m_R}(T) = \hat{p}_L Q_{m_L}(T) + \hat{p}_R Q_{m_R}(T)\]</span></p>
+<p style="color:#a67e3e;" , align="left">
+Budowa kolejnych węzłów polega na maksymalizacja różnicy:
+</p>
+<p><span class="math display">\[\Delta Q_{m,m_L,m_R} = Q_m(T) - Q_{m_L, m_R}(T)\]</span></p>
+</section><section id="regua-podziau" class="slide level2">
+<h1>Reguła podziału</h1>
+<p align="left">
+Dla ustalonego atrybutu przyjmującego w całej próbie <span class="math inline">\(L\)</span> różnych wartości, mamy aż <span class="math inline">\(2^{L-1}-1\)</span> możliwości podziału!
+</p>
+<p align="left">
+Rozwiązanie:
+</p>
+<p style="color:#a67e3e;" , align="left">
+zmienne na skali porządkowej:
+</p>
+<p><span class="math inline">\(x^{(l)} \leq c\)</span> lub <span class="math inline">\(x^{(l)} &lt; c\)</span>, gdzie <span class="math inline">\(c\)</span> jest którąś z zaobserwowanych wartości atrybutu.</p>
+<p style="color:#a67e3e;" , align="left">
+zmienne jakościowe (entropia i indeks Giniego):
+</p>
+<span class="math display">\[p(1|x^{(1)}) \leq p(1|x^{(2)}) \leq \ldots \leq p(1|x^{(L)}) \]</span>
+<p align="left">
+Wówczas jeden z <span class="math inline">\(L-1\)</span> podziałów: <span class="math inline">\(\{x^{(1)},\ldots, x^{(l)} \}, \{x^{(l + 1)},\ldots, x^{(L)} \}\)</span> maksymalizuje <span class="math inline">\(\Delta Q_{m,m_L, m_R}\)</span>.
+</p>
+</section><section id="przycinanie-drzew" class="slide level2">
+<h1>Przycinanie drzew</h1>
+<br>
+<p align="left">
+Niech <span class="math inline">\(T_0\)</span> oznacza pełne drzewo a <span class="math inline">\(|T_0|\)</span> jego rozmiar (liczba liści drzewa).
+</p>
+<br>
+<p style="color:#a67e3e;" , align="left">
+Kryterium złożoności drzewa:
+</p>
+<p align="left">
+<span class="math inline">\(R_{\alpha}(T) = R(T) + \alpha |T|\)</span>
+</p>
+<p align="left">
+gdzie <span class="math inline">\(\alpha\)</span> to czynnik złożoności a <span class="math inline">\(R(T)\)</span> to ułamek błędnych klasyfikacji dla próby uczącej.
+</p>
+</section><section id="przycinanie-drzew-1" class="slide level2">
+<h1>Przycinanie drzew</h1>
+<br>
+<p align="left">
+Mamy ciąg wartości <span class="math inline">\(\alpha_1, \ldots, \alpha_k.\)</span> Dla każdej wartości budujemy optymalne drzewo.
+</p>
+<ol start="0" type="1">
+<li>Wybór na podstawie próby testowej <br> <br></li>
+<li>Kroswalidacja: <span class="math inline">\(R^{(CV)} (T_{j0}) = \min_j R^{(CV)} (T_{j})\)</span> <br> <br></li>
+<li>1SE: Najmniejsze drzewo, dla którego <span class="math inline">\(R^{(CV)} (T_{j})\)</span> przekracza <span class="math inline">\(R^{(CV)} (T_{j0}) + \big( \frac{R^{CV}(T_{j0})(1 - R^{CV}(T_{j0}))}{V} \big)^{1/2}\)</span> gdzie <span class="math inline">\(V\)</span> to liczba podziałów próby w kroswalidacji.</li>
+</ol>
+</section></section>
+    </div>
+  </div>
+
+  <script src="prezentacja_RLadies_files/reveal.js-3.3.0.1/lib/js/head.min.js"></script>
+  <script src="prezentacja_RLadies_files/reveal.js-3.3.0.1/js/reveal.js"></script>
+
+  <script>
+
+      // Full list of configuration options available at:
+      // https://github.com/hakimel/reveal.js#configuration
+      Reveal.initialize({
+        // Display the page number of the current slide
+        slideNumber: true,
+        // Push each slide change to the browser history
+        history: true,
+        // Vertical centering of slides
+        center: false,
+        // Transition style
+        transition: 'default', // none/fade/slide/convex/concave/zoom
+        // Transition style for full page slide backgrounds
+        backgroundTransition: 'default', // none/fade/slide/convex/concave/zoom
+
+
+
+        // Optional reveal.js plugins
+        dependencies: [
+        ]
+      });
+    </script>
+  <!-- dynamically load mathjax for compatibility with self-contained -->
+  <script>
+    (function () {
+      var script = document.createElement("script");
+      script.type = "text/javascript";
+      script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+      document.getElementsByTagName("head")[0].appendChild(script);
+    })();
+  </script>
+
+<script>
+  (function() {
+    if (window.jQuery) {
+      Reveal.addEventListener( 'slidechanged', function(event) {  
+        window.jQuery(event.previousSlide).trigger('hidden');
+        window.jQuery(event.currentSlide).trigger('shown');
+      });
+    }
+  })();
+</script>
+
+
+  </body>
+</html>
