@@ -35,3 +35,6 @@ vignettes/*.pdf
 
 02_dplyr/dplyr_group3_solutions.Rmd
 *.nb.html
+
+# Carrots - modelowanie
+*modelowanie.Rproj
