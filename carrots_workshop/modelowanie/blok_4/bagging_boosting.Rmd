@@ -1,0 +1,344 @@
+---
+title: "Ensembling: bagging i boosting"
+author: "Agnieszka Sitko"
+date: "8 października 2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
+```
+
+## Podstawowe biblioteki
+```{r}
+library(dplyr)
+library(ggplot2)
+library(caret) # ML
+library(MASS) # Boston
+```
+
+## Drzewa regresyjne
+Słowo wstępu: drzewa regresyjne. http://chem-eng.utoronto.ca/~datamining/dmc/decision_tree_reg.htm
+```{r}
+simple_example <- data.frame(
+    Atmosfera = c("Deszcz", "Deszcz", "Słońce", "Słońce", "Chmury", "Chmury"),
+    Temperatura = c("Gorąco", "Zimno", "Zimno", "Gorąco", "Gorąco", "Zimno"),
+    Czas = c(3, 3.5, 5, 7, 6, 3)
+)
+simple_example
+```
+```{r}
+sd(simple_example$Czas)
+```
+```{r}
+grupuj_po_atmosferze <- simple_example %>% 
+    group_by(Atmosfera) %>% 
+    summarise(Sd = sd(Czas), Liczba = n())
+grupuj_po_atmosferze
+```
+
+```{r}
+weighted.mean(grupuj_po_atmosferze$Sd, grupuj_po_atmosferze$Liczba)
+```
+```{r}
+grupuj_po_temperaturze <- simple_example %>% 
+    group_by(Temperatura) %>% 
+    summarise(Sd = sd(Czas), Liczba = n())
+weighted.mean(grupuj_po_temperaturze$Sd, grupuj_po_temperaturze$Liczba)
+```
+
+## Dane 
+
+```{r}
+data(Boston, package = "MASS")
+Boston %>% head()
+?Boston
+```
+
+
+```{r}
+set.seed(123)
+train_ids <- sample(1:nrow(Boston), round(0.8 * nrow(Boston)))
+mm_boston <- Boston %>% 
+    dplyr::select(-medv) %>% 
+    as.matrix()
+mm_boston_train <- mm_boston[train_ids, ]
+mm_boston_test <- mm_boston[-train_ids, ]
+mm_boston_train_label <- Boston$medv[train_ids]
+mm_boston_test_label <- Boston$medv[-train_ids]
+```
+
+Benchmanrk: regresja liniowa
+```{r}
+boston_train <- Boston[train_ids, ]
+boston_test <- Boston[-train_ids, ]
+linear_boston <- lm(medv ~., boston_train)
+RMSE(predict(linear_boston, boston_test), boston_test$medv)
+```
+
+## Bagging (Bootstrap aggregating)
+
+Algorytm:
+1. Wylosuj k próbek bootstrapowych (k = 1000).
+2. Dla każdej próbki wyucz regułę decyzyjną.
+3. Uśrednij / uzgodnij wszystkie reguły.
+
+### Lasy losowe
+
+Algorytm:
+1. Wylosuj k próbek bootstrapowych (k = 1000).
+2. Dla każdej próbki wyucz regułę decyzyjną:
+ - w każdym węźle wylosuj m zmiennych do dzielenia zbioru. m jest hiperparametrem (kroswalidacja)
+3. Uśrednij / uzgodnij wszystkie reguły.
+
+
+```{r}
+set.seed(2017) # bootstrap i losowanie zmiennych nie są deterministyczne 
+library(randomForest)
+forest <- randomForest(mm_boston_train, mm_boston_train_label, 
+                       localImp = TRUE) 
+forest
+```
+
+### OOB (Out-of-Bag) Error 
+
+
+```{r}
+rf_prediction <- predict(forest) # bez argumentu newdata, liczymy predykcje OOB
+RMSE(rf_prediction, boston_train$medv)
+```
+
+```{r}
+plot(forest)
+```
+
+
+### Interpretacja i wizualizacja modelu
+```{r}
+importance(forest)
+```
+```{r}
+ importance(forest) %>%
+    as.data.frame() %>% 
+    add_rownames(var = "variable") %>% 
+    ggplot(aes(reorder(variable, `%IncMSE`), `%IncMSE`)) + 
+    geom_bar(stat = 'identity', fill = 'navy') + coord_flip()
+```
+
+#### Czas na randomForestExplainer!
+https://cran.r-project.org/web/packages/randomForestExplainer/vignettes/randomForestExplainer.html
+```{r}
+min_depth_frame <- min_depth_distribution(forest)
+min_depth_frame
+```
+
+```{r}
+plot_min_depth_distribution(min_depth_frame,
+                            mean_sample = "relevant_trees")
+```
+```{r}
+importance_frame <- measure_importance(forest)
+importance_frame
+```
+```{r}
+plot_multi_way_importance(importance_frame, 
+                          size_measure = "no_of_nodes")
+```
+
+
+## Boosting 
+- tworzymy silny model z wielu słabych modeli,
+- algorytm iteracyjny, parametryzowany przez liczbę iteracji,
+- w każdym kroku skupiamy się na tych obserwacjach, które poprzednio nienajlepiej dopasowaliśmy.
+
+### Boosting resztowy
+- problem: regresja, 
+- wyuczamy kolejne modele na resztach powstałych z sumy poprzednich modeli.
+
+Przykład: wielomian IV stopnia.
+
+```{r}
+polynomial_function <- function(x) {
+    return(poly(x, degree = 4) %*% c(1, 2, -6, 9))
+}
+
+grid <- 1:100
+polynomial_data <- data.frame(x = grid, y = polynomial_function(grid)) 
+polynomial_data$y <- polynomial_data$y + rnorm(length(grid), 1, 0.5) 
+polynomial_data %>% 
+    ggplot(aes(x, y)) + geom_point()
+```
+1. Wyucz prosty predyktor.
+```{r}
+library(rpart)
+tree1 <- rpart(y ~., polynomial_data, control = rpart.control(maxdepth = 1))
+y1_prediction <- predict(tree1)
+cbind.data.frame(polynomial_data, y1_prediction) %>% 
+    ggplot(aes(x, y)) + geom_point() + 
+    geom_line(aes(y = y1_prediction), color = "blue")
+```
+
+2. Policz reszty modelu.
+```{r}
+errors <- polynomial_data$y - y1_prediction
+data.frame(x = polynomial_data$x, errors) %>% 
+    ggplot(aes(x, errors)) + geom_point(color = "red") +
+    geom_hline(yintercept = 0)
+```
+3. Wyucz model na resztach
+```{r}
+tree2 <- rpart(errors ~., data.frame(x = polynomial_data$x, errors), 
+               control = rpart.control(maxdepth = 1))
+error2_prediction <- predict(tree2)
+data.frame(x = polynomial_data$x, errors, error2_prediction) %>% 
+    ggplot(aes(x, errors)) + geom_point(color = "red") + 
+    geom_line(aes(y = error2_prediction), color = "blue")
+```
+
+4. Dodaj predykcję reszt do predykcji y.
+```{r}
+y2_prediction <- y1_prediction + error2_prediction
+cbind.data.frame(polynomial_data, y2_prediction) %>% 
+    ggplot(aes(x, y)) + geom_point() + 
+    geom_line(aes(y = y2_prediction), color = "blue")
+```
+
+Powtarzaj kroki 2-4.
+```{r}
+gradient_boosting_step <- function(y, y_pred, x) {
+    error <- y - y_pred
+    tree <- rpart(error ~., data.frame(x, error), 
+               control = rpart.control(maxdepth = 1))
+    error_pred <- predict(tree)
+    return(y_pred + error_pred)
+}
+
+steps <- 3:10
+boosting_path <- list()
+
+y_old <- y2_prediction
+for (step in steps) {
+    y_new <- gradient_boosting_step(polynomial_data$y, 
+                                        y_old, 
+                                        polynomial_data$x)
+
+    boosting_plot <- (cbind.data.frame(polynomial_data, y_new) %>% 
+                        ggplot(aes(x, y)) + geom_point() + 
+                        geom_line(aes(y = y_new), 
+                                  color = "blue", size = 2) + 
+                          ggtitle(paste0("Step number ", step)))
+    boosting_path[[step]] <- boosting_plot
+    
+    y_old <- y_new
+}
+
+gridExtra::grid.arrange(boosting_path[[3]], boosting_path[[4]], boosting_path[[5]],
+                        boosting_path[[6]], boosting_path[[7]], boosting_path[[8]],
+                        boosting_path[[9]], boosting_path[[10]], nrow = 2)
+```
+
+### AdaBoost (Adaptive boosting)
+- problem: klasyfikacja,
+- w każdym kroku obserwacje źle sklasyfikowane dostają wyższe wagi w funkcji celu.
+
+![adaboost](./adaboost.png)
+
+- więcej: https://cseweb.ucsd.edu/~yfreund/papers/adaboost.pdf
+
+### XGBoost (Extreme Gradient Boosting)
+- przypomina gradient descent,
+- zaimplementowany w R w bibliotece `xgboost` i najczęściej używany,
+- więcej: 
+    - https://arxiv.org/pdf/1603.02754.pdf, 
+    - http://xgboost.readthedocs.io/en/latest/model.html
+    
+To jak to zrobić w R? Przejdźmy do prawdziwych danych.
+
+```{r}
+library(xgboost)
+# Funkcja xgboost przyjmuje tylko obiekty typu matrix, dgCMatrix i xgb.DMatrix!
+xg_model <- xgboost(data = mm_boston_train, 
+                    label = mm_boston_train_label, 
+                    nrounds = 10,
+                    verbose = TRUE,
+                    params = list(max_depth = 1)) 
+```
+
+Jak wybrać hiperparametry?
+- liczba iteracji,
+- inne (głębokość drzewa, krok boostingu, ...).
+Kroswalidacja!
+```{r}
+dtrain <- xgb.DMatrix(mm_boston_train, 
+                      label = mm_boston_train_label)
+param <- list(max_depth = 3, # maksymalna głębokość pojedynczego drzewa
+              eta = 1, # wielkość kroku boostingu
+              nthread = 2, # liczba wątków
+              objective = "reg:linear") # do wyboru także "binary:logistic"
+
+nrounds <- 100 # maksymalna liczba iteracji
+nfold <- 10 # liczba podzbiorów kroswalidacji
+set.seed(44)
+xgb_cv <- xgb.cv(param, dtrain, 
+                 nrounds = nrounds,
+                 nfold = nfold, 
+                 metrics = "rmse",
+                 verbose = FALSE) # nie wypisuj wyników pośrednich do konsoli
+```
+
+```{r}
+xgb_cv$evaluation_log %>% 
+    ggplot(aes(iter)) +
+    geom_ribbon(aes(ymin = train_rmse_mean - 2 * train_rmse_std, 
+                    ymax = train_rmse_mean + 2 * train_rmse_std), fill = "red", alpha = 0.3) + 
+    geom_line(aes(y = train_rmse_mean), color = "red") +
+    geom_ribbon(aes(ymin = test_rmse_mean - 2 * test_rmse_std, 
+                    ymax = test_rmse_mean + 2 * test_rmse_std), fill = "blue", alpha = 0.3) + 
+    geom_line(aes(y = test_rmse_mean), color = "blue") + 
+    ylab("RMSE")
+```
+
+```{r}
+optim_niter <- xgb_cv$evaluation_log$test_rmse_mean %>% 
+    which.min()
+xg_model <- xgboost(data = mm_boston_train, 
+                    label = mm_boston_train_label, 
+                    nrounds = optim_niter,
+                    params = list(max_depth = 2), 
+                    verbose = FALSE) 
+
+RMSE(predict(xg_model, mm_boston_test), mm_boston_test_label)
+```
+
+### Interpretacja i wizualizacja boostingu
+```{r}
+importance_matrix <- xgb.importance(colnames(mm_boston_train), 
+                                    model = xg_model)
+importance_matrix
+```
+
+```{r}
+xgb.ggplot.importance(importance_matrix)
+```
+
+
+## Bagging vs. Boosting
+
+- Bagging się łatwo zrównolegla, boosting jest sekwencyjny.
+- Bagging nie pomaga przy stabilnych modelach.
+- Boosting jest wrażliwy na obserwacje odstające.
+
+## Zadania
+
+1. Wytrenuj las losowy na zbiorze `nyc_prices.rda`.
+2. Wytrenuj boosting na zbiorze `nyc_prices.rda`.
+3. Porównaj modele z regresją liniową.
+4. Który model lepiej sobie poradził? Porównaj błąd średniokwadratowy, stabilność błędów.
+
+### Dane
+```{r}
+load("../data/nyc_prices.rda") # prices_train
+prices_train %>% 
+    head()
+```
+

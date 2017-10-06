@@ -1,0 +1,10 @@
+mkdir modelowanie
+cd modelowanie
+git init
+git remote add origin git@github.com:mi2-warsaw/RLadies.git
+git config core.sparsecheckout true
+echo "carrots_workshop/modelowanie/*" >> .git/info/sparse-checkout
+git pull --depth=1 origin master
+mv carrots_workshop/modelowanie/* .
+rm -rf carrots_workshop/
+
