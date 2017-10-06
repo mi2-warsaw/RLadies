@@ -17,17 +17,104 @@ library(caret) # ML
 library(broom) # tidy models
 ```
 
-## Dane
+## Dane 
+
 ```{r}
-load("../data/nyc_prices.rda") # prices_train
-prices_train %>% 
-    head()
+data(Boston, package = "MASS")
+Boston %>% head()
+?Boston
 ```
 
-## Bagging
 
+```{r}
+set.seed(123)
+train_ids <- sample(1:nrow(Boston), round(0.8 * nrow(Boston)))
+mm_boston <- Boston %>% 
+    select(-medv) %>% 
+    as.matrix()
+mm_boston_train <- mm_boston[train_ids, ]
+mm_boston_test <- mm_boston[-train_ids, ]
+mm_boston_train_label <- Boston$medv[train_ids]
+mm_boston_test_label <- Boston$medv[-train_ids]
+```
+
+Benchmanrk: regresja liniowa
+```{r}
+boston_train <- Boston[train_ids, ]
+boston_test <- Boston[-train_ids, ]
+linear_boston <- lm(medv ~., boston_train)
+RMSE(predict(linear_boston, boston_test), boston_test$medv)
+```
+## Drzewa regresyjne
+Słowo wstępu: drzewa regresyjne. http://chem-eng.utoronto.ca/~datamining/dmc/decision_tree_reg.htm
+
+## Bagging (Bootstrap aggregating)
+
+Algorytm:
+1. Wylosuj k próbek bootstrapowych (k = 1000).
+2. Dla każdej próbki wyucz regułę decyzyjną.
+3. Uśrednij / uzgodnij wszystkie reguły.
 
 ### Lasy losowe
+
+Algorytm:
+1. Wylosuj k próbek bootstrapowych (k = 1000).
+2. Dla każdej próbki wyucz regułę decyzyjną:
+ - w każdym węźle wylosuj m zmiennych do dzielenia zbioru. m jest hiperparametrem (kroswalidacja)
+3. Uśrednij / uzgodnij wszystkie reguły.
+
+
+```{r}
+set.seed(2017) # bootstrap i losowanie zmiennych nie są deterministyczne 
+library(randomForest)
+forest <- randomForest(mm_boston_train, mm_boston_train_label, localImp = TRUE)
+```
+
+### OOB (Out-of-Bag) Error 
+
+
+```{r}
+rf_prediction <- predict(forest) # bez argumentu newdata, liczymy predykcje OOB
+RMSE(rf_prediction, boston_train$medv)
+```
+
+```{r}
+plot(forest)
+```
+
+
+### Interpretacja i wizualizacja modelu
+```{r}
+importance(forest)
+```
+```{r}
+ importance(forest) %>%
+    as.data.frame() %>% 
+    add_rownames(var = "variable") %>% 
+    ggplot(aes(reorder(variable, `%IncMSE`), `%IncMSE`)) + 
+    geom_bar(stat = 'identity', fill = 'navy') + coord_flip()
+    
+```
+
+#### Czas na randomForestExplainer!
+https://cran.r-project.org/web/packages/randomForestExplainer/vignettes/randomForestExplainer.html
+```{r}
+min_depth_frame <- min_depth_distribution(forest)
+```
+
+```{r}
+plot_min_depth_distribution(min_depth_frame,
+                            mean_sample = "relevant_trees")
+```
+```{r}
+importance_frame <- measure_importance(forest)
+importance_frame
+```
+```{r}
+plot_multi_way_importance(importance_frame, 
+                          size_measure = "no_of_nodes")
+```
+
 
 ## Boosting 
 - tworzymy silny model z wielu słabych modeli,
@@ -57,7 +144,8 @@ library(rpart)
 tree1 <- rpart(y ~., polynomial_data, control = rpart.control(maxdepth = 1))
 y1_prediction <- predict(tree1)
 cbind.data.frame(polynomial_data, y1_prediction) %>% 
-    ggplot(aes(x, y)) + geom_point() + geom_line(aes(y = y1_prediction), color = "blue")
+    ggplot(aes(x, y)) + geom_point() + 
+    geom_line(aes(y = y1_prediction), color = "blue")
 ```
 
 2. Policz reszty modelu.
@@ -105,7 +193,8 @@ for (step in steps) {
 
     boosting_plot <- (cbind.data.frame(polynomial_data, y_new) %>% 
                         ggplot(aes(x, y)) + geom_point() + 
-                        geom_line(aes(y = y_new), color = "blue") + 
+                        geom_line(aes(y = y_new), 
+                                  color = "blue", size = 2) + 
                           ggtitle(paste0("Step number ", step)))
     boosting_path[[step]] <- boosting_plot
     
@@ -135,38 +224,13 @@ gridExtra::grid.arrange(boosting_path[[3]], boosting_path[[4]], boosting_path[[5
 To jak to zrobić w R? Przejdźmy do prawdziwych danych.
 
 ```{r}
-data(Boston, package = "MASS")
-Boston %>% head()
-?Boston
-```
-```{r}
-set.seed(123)
-train_ids <- sample(1:nrow(Boston), round(0.8 * nrow(Boston)))
-mm_boston <- Boston %>% 
-    select(-crim) %>% 
-    as.matrix()
-mm_boston_train <- mm_boston[train_ids, ]
-mm_boston_test <- mm_boston[-train_ids, ]
-mm_boston_train_label <- Boston$crim[train_ids]
-mm_boston_test_label <- Boston$crim[-train_ids]
-```
-
-Benchmanrk: regresja liniowa
-```{r}
-boston_train <- Boston[train_ids, ]
-boston_test <- Boston[-train_ids, ]
-tmp <- lm(crim ~., boston_train)
-RMSE(predict(tmp, boston_test), boston_test$crim)
-```
-
-
-```{r}
 library(xgboost)
 # Funkcja xgboost przyjmuje tylko obiekty typu matrix, dgCMatrix i xgb.DMatrix!
 xg_model <- xgboost(data = mm_boston_train, 
-                         label = mm_boston_train_label, 
-                         nrounds = 10,
-                         params = list(max_depth = 1)) 
+                    label = mm_boston_train_label, 
+                    nrounds = 10,
+                    verbose = TRUE,
+                    params = list(max_depth = 1)) 
 ```
 
 Jak wybrać hiperparametry?
@@ -177,7 +241,7 @@ Kroswalidacja!
 dtrain <- xgb.DMatrix(mm_boston_train, 
                       label = mm_boston_train_label)
 param <- list(max_depth = 3, # maksymalna głębokość pojedynczego drzewa
-              eta = 0.1, # wielkość kroku boostingu
+              eta = 1, # wielkość kroku boostingu
               nthread = 2, # liczba wątków
               objective = "reg:linear") # do wyboru także "binary:logistic"
 
@@ -217,7 +281,8 @@ RMSE(predict(xg_model, mm_boston_test), mm_boston_test_label)
 
 ### Interpretacja i wizualizacja boostingu
 ```{r}
-importance_matrix <- xgb.importance(colnames(mm_boston_train), model = xg_model)
+importance_matrix <- xgb.importance(colnames(mm_boston_train), 
+                                    model = xg_model)
 importance_matrix
 ```
 
@@ -228,7 +293,21 @@ xgb.ggplot.importance(importance_matrix)
 
 ## Bagging vs. Boosting
 
+- Bagging się łatwo zrównolegla, boosting jest sekwencyjny.
+- Bagging nie pomaga przy stabilnych modelach.
+- Boosting jest wrażliwy na obserwacje odstające.
+
 ## Zadania
+
 1. Wytrenuj las losowy na zbiorze `nyc_prices.rda`.
 2. Wytrenuj boosting na zbiorze `nyc_prices.rda`.
-3. Który model lepiej sobie poradził? Porównaj błąd średniokwadratowy, stabilność błędów.
+3. Porównaj modele z regresją liniową.
+4. Który model lepiej sobie poradził? Porównaj błąd średniokwadratowy, stabilność błędów.
+
+### Dane
+```{r}
+load("../data/nyc_prices.rda") # prices_train
+prices_train %>% 
+    head()
+```
+
