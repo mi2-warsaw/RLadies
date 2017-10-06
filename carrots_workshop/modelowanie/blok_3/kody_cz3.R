@@ -4,7 +4,7 @@ library('magrittr')
 library("ggplot2")
 library("rpart")
 
-dane <- read.csv('titanic.csv')
+dane <- read.csv('./data/titanic.csv')
 dane %<>% select(-c(PassengerId,Name, Ticket, Cabin))
 head(dane)
 
@@ -31,7 +31,7 @@ test <- dane[-los,]
 check_class <- function(true, pred){
   t <- table(true, pred)
   results <- c(sum(diag(t))/sum(t), t[2,2]/sum(t[2,]), t[2,2]/sum(t[,2]), t[1,1]/sum(t[,1]))
-  names(results) <- c("% popr. odp.", "czu³oœæ", "precyzja", "specyficznoœæ")
+  names(results) <- c("% popr. odp.", "czu?o??", "precyzja", "specyficzno??")
   results
 }
 
@@ -70,8 +70,8 @@ predict(logit.bic, data.frame(Pclass=1, Sexfemale = 0,Age = 24,
 
 probs <- predict(logit.bic, test,type='response')
 
-qplot(probs) + ggtitle("Histogram uzyskanych prawdopodobieñstw przynale¿noœci do klasy 1") +
-  labs(y = "Czêstoœæ", x = "Prawdopodobieñstwo") + theme_minimal() +
+qplot(probs) + ggtitle("Histogram uzyskanych prawdopodobie?stw przynale?no?ci do klasy 1") +
+  labs(y = "Cz?sto??", x = "Prawdopodobie?stwo") + theme_minimal() +
   theme(axis.title.x = element_text(size = 15, angle = 0, face = "italic"), 
         axis.title.y = element_text(size = 15, angle = 90, face = "italic")) +
   theme(legend.title = element_text(size = 14, face = "bold")) +
@@ -82,11 +82,11 @@ qplot(probs) + ggtitle("Histogram uzyskanych prawdopodobieñstw przynale¿noœci do
 class <- ifelse(probs > 0.6,1,0)
 check_class(test$Survived, class)
 
-dane <- read.table("earthquake.txt", h = T)
+dane <- read.table("./data/earthquake.txt", h = T)
 
 
 ggplot(data = dane, aes(x = body, y = surface, col = popn))+
-  geom_point(size = 2.5) + theme_minimal() + ggtitle("Przyk³ad danych liniowo separowalnych") +
+  geom_point(size = 2.5) + theme_minimal() + ggtitle("Przyk?ad danych liniowo separowalnych") +
   theme(axis.title.x = element_text(size = 15, angle = 0, face = "italic"), 
         axis.title.y = element_text(size = 15, angle = 90, face = "italic")) +
   theme(legend.title = element_text(size = 14, face = "bold")) + theme(title = element_text(size = 20)) +
@@ -117,7 +117,7 @@ ggplot() + xlim(c(4.4, 6.6)) + ylim(c(3.4, 6.8)) + theme_minimal() +
                aes(x = body, y = surface, z = pred2), bins = 1, col = "black", 
                linetype = 1, size = 1.2, alpha = 0.5) + 
   geom_point(data = dane, aes(x = body, y = surface, col = popn), size = 2) + 
-  xlab("body") + ylab("surface") + ggtitle("Przyk³ad klasyfikacji za pomoc¹ drzewa") +
+  xlab("body") + ylab("surface") + ggtitle("Przyk?ad klasyfikacji za pomoc? drzewa") +
   theme(plot.title = element_text(face = "bold", size = 20)) + 
   theme(axis.title.x = element_text(size = 18, angle = 0, face = "italic"), 
         axis.title.y = element_text(size = 18, angle = 90, face = "italic")) +
