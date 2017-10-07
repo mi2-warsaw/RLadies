@@ -5,7 +5,7 @@ x
 (y <- "r-ladies")
 
 z <- NA
-k <- TRUE
+k <- FALSE
 
 ## Sprawdzanie typów
 is.numeric(x)
@@ -37,7 +37,7 @@ vec * x
 sum(vec, vec2, x)
 
 ## data frame
-df <- data.frame(col_1 = c(1, 2, 3), col_2 = c("one", "two", "three"))
+df <- data.frame(col_1 = c(1, 2, 3), col_2 = c("one", "two", "three"), stringsAsFactors = F)
 str(df)
 class(df)
 
