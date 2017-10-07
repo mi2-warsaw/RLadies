@@ -499,7 +499,7 @@ document.getElementsByTagName('head')[0].appendChild(style);
 </section>
 
 <section><section id="what-is-spark" class="titleslide slide level1"><h1>What is Spark?</h1></section><section id="what-is-spark-1" class="slide level2">
-<h1>What is Spark?</h1>
+<h2>What is Spark?</h2>
 <p><img src="images/spark_logo.png" alt="Thanks" /></p>
 <blockquote>
 <p><strong>Apache Spark™</strong> is a fast and general engine for large-scale data processing.</p>
@@ -507,26 +507,26 @@ document.getElementsByTagName('head')[0].appendChild(style);
 <p><small> Source: <a href="https://spark.apache.org/" class="uri">https://spark.apache.org/</a> </small></p>
 </section></section>
 <section><section id="what-are-the-benefits-of-spark" class="titleslide slide level1"><h1>What are the benefits of Spark?</h1></section><section id="speed" class="slide level2">
-<h1>Speed</h1>
+<h2>Speed</h2>
 <p>Spark runs programs up to 100x faster than Hadoop MapReduce in memory, or 10x faster on disk.</p>
 <p><img src="images/logistic-regression.png" alt="Thanks" /></p>
 <p><small> Source: <a href="https://spark.apache.org/" class="uri">https://spark.apache.org/</a> </small></p>
 </section><section id="ease-of-use" class="slide level2">
-<h1>Ease of use</h1>
+<h2>Ease of use</h2>
 <p>Spark has easy-to-use APIs in Java, Scala, Python and R for operating on large datasets.</p>
 </section><section id="generality" class="slide level2">
-<h1>Generality</h1>
+<h2>Generality</h2>
 <p>Spark comes packaged with higher-level libraries, including support for SQL queries, streaming data, machine learning and graph processing.</p>
 <p><img src="images/ecosystem.png" alt="Thanks" /></p>
 <p><small> Source: <a href="https://databricks.com/spark" class="uri">https://databricks.com/spark</a> </small></p>
 </section></section>
 <section><section id="spark-ecosystem" class="titleslide slide level1"><h1>Spark Ecosystem</h1></section><section id="spark-sql-dataframes" class="slide level2">
-<h1>Spark SQL + DataFrames</h1>
+<h2>Spark SQL + DataFrames</h2>
 <blockquote>
 <p><strong>Spark SQL</strong> is module for working with structured data.</p>
 </blockquote>
 </section><section id="spark-sql-dataframes-1" class="slide level2">
-<h1>Spark SQL + DataFrames</h1>
+<h2>Spark SQL + DataFrames</h2>
 <ul>
 <li>lets you query structured data inside Spark programs, using either SQL or a familiar DataFrame API,</li>
 <li>acts like distributed SQL query engine,</li>
@@ -534,43 +534,43 @@ document.getElementsByTagName('head')[0].appendChild(style);
 <li>provides industry standard JDBC and ODBC connectivity for business intelligence tools.</li>
 </ul>
 </section><section id="streaming" class="slide level2">
-<h1>Streaming</h1>
+<h2>Streaming</h2>
 <blockquote>
 <p><strong>Spark Streaming</strong> makes it easy to build scalable fault-tolerant streaming applications.</p>
 </blockquote>
 </section><section id="streaming-1" class="slide level2">
-<h1>Streaming</h1>
+<h2>Streaming</h2>
 <ul>
 <li>lets you write streaming jobs the same way you write batch jobs,</li>
 <li>is fault-tolerant - recovers lost work out of the box,</li>
 <li>intergrates with a wide variety of popular data sources, including HDFS, Flume, Kafka and Twitter.</li>
 </ul>
 </section><section id="mllib-machine-learning" class="slide level2">
-<h1>MLlib (Machine Learning)</h1>
+<h2>MLlib (Machine Learning)</h2>
 <blockquote>
 <p><strong>MLlib</strong> is Apache Spark’s scalable machine learning library.</p>
 </blockquote>
 </section><section id="mllib-machine-learning-1" class="slide level2">
-<h1>MLlib (Machine Learning)</h1>
+<h2>MLlib (Machine Learning)</h2>
 <ul>
 <li>usable in Java, Scala, Python and R,</li>
 <li>contains high-quality algorithms that leverage iteration, and can yield better results than the one-pass approximations sometimes used on MapReduce,</li>
 <li>runs on existing Hadoop clusters and data.</li>
 </ul>
 </section><section id="graphx-graph-computation" class="slide level2">
-<h1>GraphX (Graph Computation)</h1>
+<h2>GraphX (Graph Computation)</h2>
 <blockquote>
 <p><strong>GraphX</strong> is Apache Spark’s API for graphs and graph-parallel computation.</p>
 </blockquote>
 </section><section id="graphx-graph-computation-1" class="slide level2">
-<h1>GraphX (Graph Computation)</h1>
+<h2>GraphX (Graph Computation)</h2>
 <ul>
 <li>competes on performance with the fastest graph systems while retaining Spark’s flexibility, fault tolerance and ease of use,</li>
 <li>comes with variety of graph algorithms.</li>
 </ul>
 </section></section>
 <section><section id="spark-in-r" class="titleslide slide level1"><h1>Spark in R</h1></section><section id="sparkr-and-sparklyr" class="slide level2">
-<h1><em>SparkR</em> and <em>sparklyr</em></h1>
+<h2><em>SparkR</em> and <em>sparklyr</em></h2>
 <p><em>SparkR</em> and <em>sparklyr</em> are both R interfaces to Spark, which:</p>
 <ul>
 <li>support connecting to local and remote Spark clusters,</li>
@@ -579,7 +579,7 @@ document.getElementsByTagName('head')[0].appendChild(style);
 </ul>
 <p><small>Worth reading: <a href="https://github.com/rstudio/sparklyr/issues/502"><em>sparklyr</em> and <em>SparkR</em> - the future?</a> </small></p>
 </section><section id="sparklyr" class="slide level2">
-<h1>sparklyr</h1>
+<h2>sparklyr</h2>
 <ul>
 <li>connects to Spark from R and provides a complete <em>dplyr</em> backend,</li>
 <li>filters and aggregates Spark datasets then brings them into R for analysis and visualization,</li>
@@ -587,35 +587,35 @@ document.getElementsByTagName('head')[0].appendChild(style);
 <li>creates extensions that call the full Spark API and provides interfaces to Spark packages.</li>
 </ul>
 </section><section id="sparklyr-1" class="slide level2">
-<h1>sparklyr</h1>
+<h2>sparklyr</h2>
 <p><img src="images/sparklyr.png" alt="Thanks" /> <small> Source: <a href="https://blog.cloudera.com/blog/2016/09/introducing-sparklyr-an-r-interface-for-apache-spark/">https://blog.cloudera.com</a> </small></p>
 </section><section id="a-word-of-warning" class="slide level2">
-<h1>A word of warning</h1>
+<h2>A word of warning</h2>
 <ul>
 <li>Spark is still new technology and sometimes you don’t get clear error messages,</li>
 <li><em>sparklyr</em> is newer and doesn’t have a full set of features - the Scala and Python interfaces to Spark are more mature.</li>
 </ul>
 </section></section>
 <section><section id="how-to-start-working-with-spark-and-sparklyr" class="titleslide slide level1"><h1>How to start working with Spark and <em>sparklyr</em>?</h1></section><section id="install-sparklyr" class="slide level2">
-<h1>Install <em>sparklyr</em></h1>
+<h2>Install <em>sparklyr</em></h2>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># install devtools package</span>
 <span class="kw">install.packages</span>(<span class="st">&quot;devtools&quot;</span>)
 <span class="kw">library</span>(devtools)
 <span class="co"># install the latest version of sparklyr</span>
-devtools::<span class="kw">install_github</span>(<span class="st">&quot;rstudio/sparklyr&quot;</span>)</code></pre></div>
+devtools<span class="op">::</span><span class="kw">install_github</span>(<span class="st">&quot;rstudio/sparklyr&quot;</span>)</code></pre></div>
 </section><section id="install-spark-through-sparklyr" class="slide level2">
-<h1>Install Spark through <em>sparklyr</em></h1>
+<h2>Install Spark through <em>sparklyr</em></h2>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(sparklyr)
 <span class="co"># check available versions of Spark</span>
 <span class="kw">spark_available_versions</span>()
 <span class="co"># install locally the latest version</span>
 <span class="kw">spark_install</span>(<span class="dt">version =</span> <span class="st">&quot;2.2.0&quot;</span>)</code></pre></div>
 </section><section id="make-sure-java-is-installed" class="slide level2">
-<h1>Make sure Java is installed</h1>
+<h2>Make sure Java is installed</h2>
 <div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="co"># check available version of Java</span>
-<span class="kw">java</span> -version
+<span class="ex">java</span> -version
 <span class="co"># if not available, install it</span>
-<span class="kw">sudo</span> apt install openjdk-8-jdk openjdk-8-jre</code></pre></div>
+<span class="fu">sudo</span> apt install openjdk-8-jdk openjdk-8-jre</code></pre></div>
 </section></section>
 <section><section id="lets-start-coding" class="titleslide slide level1"><h1>Let’s start coding!</h1></section></section>
     </div>
