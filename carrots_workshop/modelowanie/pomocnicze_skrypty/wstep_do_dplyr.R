@@ -23,7 +23,7 @@ aggregate(mass ~ homeworld + gender, data = starwars, FUN = mean, na.rm = TRUE)
 
 starwars %>% 
     group_by(homeworld, gender) %>% 
-    summarise(mean_weigh = mean(mass, na.rm = TRUE))
+    summarise(mean_weight = mean(mass, na.rm = TRUE))
 
 # Narysujmy jakiś wykres
 library(ggplot2)
@@ -32,3 +32,13 @@ ggplot(starwars, aes(mass, height, colour = species)) + geom_point()
 
 starwars %>% 
     ggplot(aes(mass, height, colour = species)) + geom_point()
+
+# Stwórzmy nowe zmienne
+starwars %>% 
+    mutate(dlugosc_imienia = nchar(name)) %>% 
+    select(name, dlugosc_imienia) %>% 
+    arrange(-dlugosc_imienia) %>% 
+    rename(name_length = dlugosc_imienia)
+
+
+

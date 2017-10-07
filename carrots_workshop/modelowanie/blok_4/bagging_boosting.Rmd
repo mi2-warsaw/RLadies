@@ -145,6 +145,31 @@ plot_multi_way_importance(importance_frame,
                           size_measure = "no_of_nodes")
 ```
 
+### Co jeszcze możemy wyciągnąć z drzew losowych?
+
+#### Podobieństwo zmiennych (proximities)
+```{r}
+forest_prox <- randomForest(mm_boston_train, mm_boston_train_label, 
+                       proximity = TRUE) 
+prox_subset <- forest_prox$proximity[1:10, 1:10] %>% 
+    as.data.frame()
+prox_subset_melted <- prox_subset %>% 
+    reshape2::melt()
+prox_subset_melted$variable2 <- rep(colnames(prox_subset), 10)
+prox_subset_melted %>% 
+    filter(variable != variable2) %>% 
+    ggplot() + geom_tile(aes(factor(variable, colnames(prox_subset)),
+                             factor(variable2, colnames(prox_subset)), fill = value)) + 
+    scale_fill_gradient(low = "white", high = "steelblue") + 
+    xlab("zmienna 1") + ylab("zmienna 2")
+```
+
+### Identyfikacja obserwacji odstających
+- obserwacje o niskich wartościach podobieństwa do wszystkich
+obserwacji z tej samej klasy (klasyfikacja) / bliskiej wartości objaśniającej (regresja)
+
+### Imputacja zmiennych
+- mając miarę podobieństwa pomiędzy obserwacjami, obserwacje brakujące są uzupełniane przez ważoną średnią z sąsiednich wierszy (sąsiednich w sensie proximities)
 
 ## Boosting 
 - tworzymy silny model z wielu słabych modeli,
