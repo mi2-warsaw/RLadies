@@ -1,0 +1,631 @@
+---
+title: "Introduction to Spark in R (using `sparklyr`)"
+author: "Justyna Jankowiak"
+date: "07-08.10.2017"
+output: html_document
+---
+
+# Workflow
+
+The typical workflow has three steps:
+
+1. Connect,
+2. Do some work,
+3. Disconnect.
+
+```{r, eval=FALSE, results=FALSE, warning=FALSE, message=FALSE}
+library(sparklyr)
+
+# connect
+conn <- spark_connect(master = "local")
+# It's possible that you have to set JAVA_HOME and SPARK_HOME variables 
+# Sys.setenv(JAVA_HOME = "/usr/lib/jvm/java-8-openjdk-amd64")
+# Sys.setenv(SPARK_HOME = "/home/justyna/spark/spark-2.2.0-bin-hadoop2.7")
+
+# do some work
+spark_connection_is_open(conn)
+
+# disconnect
+spark_disconnect(conn)
+```
+
+`spark_connect()` takes argument `master` which is url to Spark cluster to connect to. We use `"local"` to connect to local instance of Spark install via `spark_install()`.
+
+Now we can check if the connection is open using `spark_connection_is_open()` with the name of created connection as its argument.
+
+After our work is done we can close the connection with `spark_disconnect(conn)`.
+
+# Getting data
+
+There are to ways to get data into Spark:
+
+1. reading data directly from a file (e.g. csv)
+2. copying `data.frame` from R
+
+Loading data is a slow process - when working with big data we want to avoid copying data from one location to another.
+
+```{r, eval=FALSE, results=FALSE, warning=FALSE, message=FALSE}
+# For this chunk and all following once we assume that the sparklyr library is loaded 
+# and connection to Spark is established
+
+# read data from csv 
+spark_read_csv(conn, "titanic", "data/titanic_spark.csv")
+
+# copy data.frame from R
+library(MASS) # for dataset Boston
+library(dplyr) # for copy_to() function
+copy_to(conn, Boston, "house_prices")
+
+# check all available tables stored in Spark
+src_tbls(conn)
+```
+To read data from file we use functions `spark_read_*()`. They all take three obligatory arguments - a Spark connection, name to assign and path to the file.
+
+We can also copy data directly from R with `dplyr`'s `copy_to()` function which takes connection and local data frame as argument. We can also specify name for new remote table but it is not necessary.
+
+After loading datasets we can list all tables stored in Spark with `src_tbls()` function.
+
+# Exploring data
+
+In Spark the data is stored in the variable called `DataFrame` which is more or less the same as R's `data.frame`. If we want to explore the data stored in Spark we have to locally create object which has connection to remote data. 
+
+```{r, eval=FALSE, results=FALSE, warning=FALSE, message=FALSE}
+# create reference to Spark table without loading it into memory
+house_prices_tbl <- tbl(conn, "house_prices")
+
+# is tibble?
+is.tbl(house_prices_tbl)
+
+# print data (default number of rows = 10)
+print(house_prices_tbl)
+
+# print first 5 rows with the width of 25 characters
+print(house_prices_tbl, width = 25)
+
+# examine the stucture with str() function
+str(house_prices_tbl)
+
+# examine the structure with glimpse() function
+glimpse(house_prices_tbl)
+
+# the size of data stored in R
+object.size(Boston)
+
+# the size of data stored in R as a tibble
+object.size(house_prices_tbl)
+```
+
+Calling `tbl()` with a Spark connection and the name of table stored in Spark will create object of type `tibble`. The tibble object doesn't keep a copy of the data itself only reference to it. The `print()` method uses Spark connection stored in tibble object, copies a piece of the data back to R and displays it. We can manipulate how many rows and columns we want to display by changing arguments `n` and `width`. We use `glimpse()` function to examine the structure of the data, because `str()` doesn't know how to retrieve tha data from remote source.
+
+We can see by analyzing results of `object.size()` that `tibble` object is smaller than the same structure stored in R, because it stores only connection to to the romote data, not the data itself.
+
+# Manipulating data using `dplyr` syntax
+
+There are five main actions you can do with data using `dplyr`:
+
+- select columns
+- filter rows
+- arrange rows
+- change or add columns
+- calculate summary statistics
+
+All operations are performed on tibble objects. The `dplyr` methods use Spark SQL interface (so they actually convert R code into SQL code before passing it to Spark).
+
+## Select columns
+
+```{r, eval=FALSE, results=FALSE, warning=FALSE, message=FALSE}
+# select columns
+# crim - per capita crime rate by town
+# age - proportion of owner-occupied units built prior to 1940
+# medv - median value of owner-occupied homes in 1000$
+house_prices_tbl %>% 
+  select(crim, age, medv)
+
+# note that square bracket indexing is not supported 
+house_prices_tbl[, c("crim", "age", "medv")]
+
+# choose all but crim, age, medv
+house_prices_tbl %>% 
+  select(-crim, -age, -medv)
+
+# select columns between nox and tax
+house_prices_tbl %>% 
+  select(nox:tax)
+
+# select all columns starting from "r"
+house_prices_tbl %>% 
+  select(starts_with("r"))
+
+# select all columns containing "rat" 
+house_prices_tbl %>% 
+  select(contains("rat"))
+
+# select all columns matching regular expression (ends with "s")
+house_prices_tbl %>% 
+  select(matches("s$"))
+
+# select all columns matching regular expression (two "t"s with some letter(s) between)
+house_prices_tbl %>% 
+  select(matches("t.+t"))
+```
+
+Selecting columns id done by function `select()` with unquoted names of the columns you want to keep. You can also select columns by excluding some columns, with `-` before the name.
+
+Sometimes is easier not to call names of ther columns directly. When we want to select columns which are next to each other we can use them using syntax `name_of_the_column_to_start:name_of_the_column_to_end`. We can also specify the names of columns we want to keep by calling `starts_with()` and `ends_with()` methods which will keep only the columns with the names starting (of ending) with string specified as an argument. Method `contains()` with some string as an argument will keep columns which contain in the name this string. Finally, we can also use regular expressions with the method `matches()` to select specific columns.
+
+## Filter rows
+```{r, eval=FALSE, results=FALSE, warning=FALSE, message=FALSE}
+# filter rows
+# rm - average number of rooms per dwelling > 8
+house_prices_tbl %>% 
+  filter(rm > 8)
+
+# ptratio - pupil-teacher ratio < 15
+# crim - per capita crime rate by town < 0.005
+house_prices_tbl %>% 
+  filter(ptratio < 15, crim < 0.02)
+```
+
+We can filter the rows by using function `filter()` with logical conditions on the columns as the arguments. The number of operations is limited but we can use comparison, mathematical and logical operators and many mathematical functions such as `log()` or `abs()`.
+
+## Arrange rows
+```{r, eval=FALSE, results=FALSE, warning=FALSE, message=FALSE}
+# arrange by age in ascending order
+house_prices_tbl %>% 
+  arrange(age)
+
+# arrange by crim in ascending order and by rm in descending order
+house_prices_tbl %>% 
+  arrange(crim, desc(rm))
+```
+
+To arrange rows in specific order we use `arrange()` function. Default sorting is in ascending order but we can use `desc()` method on the column to sort it in descending order.
+
+## Change or add columns
+```{r, eval=FALSE, results=FALSE, warning=FALSE, message=FALSE}
+# change tax column by multiplying it by 10 000
+house_prices_tbl %>% 
+  mutate(tax = tax * 10000)
+
+# create new column is_cheap which is transformation of medv column
+house_prices_tbl %>% 
+  mutate(is_cheap = ifelse(medv < 25, "cheap", "expensive"))
+
+# create new column crim_medv_ratio which is crim to medv proportion
+house_prices_tbl %>% 
+  mutate(crim_medv_ratio = crim / medv)
+```
+
+Using `mutate()` function allows us to transform existing column or create a new one. The function takes arguments in the form `name_of_the_column = value_of_the_column`. When updating or adding the column you can operate on more than one column to count its value. 
+
+## Calculate summary statistics
+```{r, eval=FALSE, results=FALSE, warning=FALSE, message=FALSE}
+# calculate mean medv
+house_prices_tbl %>% 
+  summarise(mean_medv = mean(medv))
+
+# calculate min dis and sd of tax
+house_prices_tbl %>% 
+  summarise(min_dis = min(dis), sd_tax = sd(tax))
+```
+`summarise()` function is used to calculate summary of a column (e.g `min()`, `max()` or `mean()` value). The object returned by this function is also a tibble, even if it's only one single value.
+
+## Select distinct rows
+```{r, eval=FALSE, results=FALSE, warning=FALSE, message=FALSE}
+# select ditinct values for column chas
+house_prices_tbl %>% 
+  distinct(chas)
+
+# select distinct combinations of columns rad and chas
+house_prices_tbl %>% 
+  distinct(rad, chas)
+```
+
+Function `distinct()` is especially useful for categorical variables. When we call `distinct()` with only one column name as an argument we get unique values of this column. Two or more arguments will give us all unique combinations of values of the columns.
+
+## Count unique combinations
+```{r, eval=FALSE, results=FALSE, warning=FALSE, message=FALSE}
+# count how many of each value from column chas we have
+house_prices_tbl %>% 
+  count(chas)
+
+# count how many combinations of values from columns rad and chas we have
+house_prices_tbl %>% 
+  count(rad, chas, sort = TRUE)
+
+# now take five the most common values of rad
+house_prices_tbl %>% 
+  count(rad, sort = TRUE) %>% 
+  top_n(5)
+```
+
+If we want to count how many times the specific combinations of values occurs in our dataset we use function `count()` (with column(s) name(s) as an argument(s)). Additional argument is logical `sort` value which indicates if the result should be sorted in descending order by number of occurrences. Then we can chain this function with `top_n()` function to get top the most common combinations.
+
+See that we can perform few operations one after the other by chaining it. It very useful and practical since usually we need more than one operation to get the desired result.
+
+## Group by the same value
+```{r, eval=FALSE, results=FALSE, warning=FALSE, message=FALSE}
+# calculate average mean of medv in each group by rad
+house_prices_tbl %>% 
+  group_by(rad) %>% 
+  summarise(medv_mean = mean(medv))
+
+# mutate age by group-specific normalization (by chas)
+house_prices_tbl %>% 
+  group_by(chas) %>% 
+  mutate(age_norm = (age - mean(age)) / sd(age)) %>% 
+  select(chas, age, age_norm)
+```
+
+We use `group_by()` followed by `summarise()` or `mutate()` when we want to apply a summary statistic on each group or mutate column with group-specific values (respecively).
+
+## Collect and compute data
+```{r, eval=FALSE, results=FALSE, warning=FALSE, message=FALSE}
+# assign results to new tibble
+results <- house_prices_tbl %>% 
+  filter(medv < 10) %>% 
+  count(rad, chas)
+
+# collect the results
+collected <- results %>% collect()
+
+# check class of two objects
+class(results)
+class(collected)
+
+# compute the intermediate results and store in Spark
+house_prices_tbl %>% 
+  filter(medv < 10) %>%
+  compute("house_prices_filtered")
+
+# check if new object was created
+src_tbls(conn)
+```
+We already know that tibble stores only a reference to the data, not the data itself. But if we want to move data back to R (for example to plot it) we can use `collect()` function. 
+
+Copying data between Spark and R is slow, so it should only be performed when really needed. To store the result of intermediate calculations without collecting it we can use `compute()` function, which compute the calculations and stores the result in Spark. The function takes the string argument which is the name for new variable.
+
+# Manipulating data using SQL syntax
+
+The other way to manipulate data in Spark is to use raw SQL syntax. SQL queries are written as strings, and passed to `dbGetQuery()` from the `DBI` package. The are two differences when using SQL instead of `dplyr`:
+
+- `dbGetQuery()` will always execute the query and return the results to R immediately,
+- that `DBI` functions return data.frames rather than tibbles.
+
+```{r, eval=FALSE, results=FALSE, warning=FALSE, message=FALSE}
+library(DBI)
+
+# take only nox, rm and age columns and return only 10 first rows
+result <- dbGetQuery(conn, "SELECT nox, rm, age FROM house_prices LIMIT 10")
+
+# check the class of result object
+class(result)
+```
+
+# Machine learning techniques
+
+In addition  to `dplyr` interface `sparklyr` contains also the interface which supports access to Spark machine learning library - MLlib. It provides three families of functions that you can use with Spark machine learning:
+
+- machine learning algorithms for analyzing data (`ml_*`)
+- feature transformers for manipulating individual features (`ft_*`)
+- functions for manipulating Spark DataFrames (`sdf_*`)
+
+It calls Java or Scala code to access Spark libraries directly, without any conversion to SQL and that's why it is more flexible. 
+
+## ML transformers
+
+A model is often fit not on a dataset as-is, but instead on some transformation of that dataset. Spark provides feature transformers, facilitating many common transformations of data within a Spark DataFrame, and sparklyr exposes these within the `ft_*()` family of functions. These routines generally take one or more input columns, and generate a new output column formed as a transformation of those columns.
+
+All the sparklyr feature transformation functions have a similar user interface. The first three arguments are always a Spark tibble, a string naming the input column, and a string naming the output column:
+
+```{r, eval=FALSE, results=FALSE, warning=FALSE, message=FALSE}
+a_tibble %>%
+  ft_some_transformation("x", "y", some_other_args)
+```
+
+### Transform continuous variable to binary
+
+```{r, eval=FALSE, results=FALSE, warning=FALSE, message=FALSE}
+# creating tibble for new dataset
+iris <- iris
+copy_to(conn, iris, "iris")
+iris_tbl <- tbl(conn, "iris")
+
+# be careful - dots in the columns' names have been replaced by underscores!
+glimpse(iris_tbl)
+
+# convert continuous column into logical
+iris_tbl %>% 
+  ft_binarizer("Petal_Length", "petal_is_long", 4)
+
+# when collecting to R
+collected <- iris_tbl %>% 
+  ft_binarizer("Petal_Length", "petal_is_long", 4) %>% 
+  collect() %>% 
+  mutate(petal_is_long = as.logical(petal_is_long))
+```
+
+`ft_binarizer()` function converts continuous variable into logical. The additional argument (referred above as `some_other_args`) is threshold - the number which splits the scale into 0 and 1 values.
+
+It's important to note that the column after transformation consists of DoubleType values so when you collect data back into R you have to transform this column to logical.
+
+### Transform continuous variable to caterogical
+```{r, eval=FALSE, results=FALSE, warning=FALSE, message=FALSE}
+# convert continuous column into categorical
+# [0, 5) - 0, [5, 6) - 1, [6, 7) - 2 ...
+iris_tbl %>% 
+  ft_bucketizer("Sepal_Length", "sepal_length_level", splits = c(0, 5, 6, 7, Inf))
+
+# when collecting to R
+splits <- c(0, 5, 6, 7, Inf)
+collected <- iris_tbl %>% 
+  ft_bucketizer("Sepal_Length", "sepal_length_level", splits = splits) %>% 
+  collect() %>% 
+  mutate(sepal_length_level = factor(sepal_length_level))
+
+# convert continuous column into categorical by quantiles
+iris_tbl %>%
+  ft_bucketizer("Sepal_Length", "sepal_length_level", splits = c(0, 5, 6, 7, Inf)) %>% 
+  ft_quantile_discretizer("Sepal_Length", "sepal_length_level_q", n.buckets = 4)
+```
+`ft_bucketizer()` is similar to  `cut()` function in basic R - it splits continuous variable into bins. This time, instead for one threshold (as in `ft_binarizer()`) we pass vector of thresholds.
+
+The function returns a numeric vector, so if you want to work on the results in R, you need to convert it to a factor.
+
+When we want cut the continuous variable into buckets by quantiles we use `ft_quantile_discretizer()` function. Using the argument `n.buckets` we can determine number of buckets we want.
+
+### Encode character column into numerical column
+```{r, eval=FALSE, results=FALSE, warning=FALSE, message=FALSE}
+iris_tbl %>% 
+  ft_string_indexer("Species", "species_ind")
+```
+
+Machine learning algorithms from `sparklyr` return encoded prediciton values instead of original values. That's why we will use `ft_string_indexer()` to encode dependent variables in our datasets. It encodes a column of labels into a column of label indices. The indices are in [0, numLabels), ordered by label frequencies, with the most frequent label assigned index 0. The transformation can be reversed with `ft_index_to_string()`.
+
+### Transform a data using SQL
+```{r, eval=FALSE, results=FALSE, warning=FALSE, message=FALSE}
+# use SQL query with ft_sql_transformer() function
+# we get the same result as from the `dbGetQuery()` function
+result <- iris_tbl %>% 
+  ft_sql_transformer("SELECT Sepal_Length, Sepal_width FROM iris WHERE Petal_Width < 1 LIMIT 10")
+
+# this is still tibble!
+class(result)
+```
+Another way to use SQL when manipulating the data is to simply use `ft_sql_transformer()` function. There's no need to use `DBI` package any more since we have the same functionality in `spraklyr` package.
+
+The difference between the two functions is that the function from `sparklyr` packages will return tibble object, not a data frame.
+
+
+## Split data to training and test set
+
+```{r, eval=FALSE, results=FALSE, warning=FALSE, message=FALSE}
+# first we add column 'species_ind'
+iris_tbl_ind <- iris_tbl %>% 
+  ft_string_indexer("Species", "Species_ind")
+
+# split data on training and testing set
+train_test <- iris_tbl_ind %>% 
+  sdf_partition(training = 0.7, testing = 0.3)
+
+# you can split data set into more than two sets!
+# if the fractions don't add up to one they will be scaled
+iris_tbl %>% 
+  sdf_partition(set_a = 0.3, set_b = 0.3, set_c = 0.6)
+
+# use indexing operator to access the subset
+training_tbl <- train_test$training
+testing_tbl <- train_test[["testing"]]
+```
+
+Before the modeling we have to split our data set into training and testing sets. We fit the model on the training set and test the model predictions against the testing set. `sdf_partition()` function provides a way of partitioning your data frame into training and testing sets. We can use any set names and we can split data set into more than two subsets.
+
+The return value is a list of tibble.
+
+## Machine learning functions
+
+The `ml_*()` functions take the arguments `response` and `features`. But `features` can also be a formula with main effects. The intercept term can be omitted by using -1. Check in help all available arguments for a specific function.
+
+```{r, eval=FALSE, results=FALSE, warning=FALSE, message=FALSE}
+# equivalent statements
+ml_linear_regression(z ~ -1 + x + y)
+ml_linear_regression(intercept = FALSE, response = "z", features = c("x", "y"))
+```
+
+### Linear regression
+```{r, eval=FALSE, results=FALSE, warning=FALSE, message=FALSE}
+# train linear regression model
+model_lr <- iris_tbl %>% 
+  select(Petal_Width, Petal_Length) %>%
+  ml_linear_regression(Petal_Length ~ Petal_Width)
+
+# check model summary
+summary(model_lr)
+
+# how well the model fits?
+library(ggplot2)
+iris_tbl %>%
+  select(Petal_Width, Petal_Length) %>%
+  collect %>%
+  ggplot(aes(Petal_Length, Petal_Width)) +
+    geom_point(aes(Petal_Width, Petal_Length)) +
+    geom_abline(aes(slope = coef(model_lr)[2], intercept = coef(model_lr)[1]), color = "red") +
+    labs(x = "Petal Width", y = "Petal Length")
+```
+Use Spark’s linear regression to model the linear relationship between a response variable and one or more explanatory variables.
+
+### Logistic regression
+
+```{r, eval=FALSE, results=FALSE, warning=FALSE, message=FALSE}
+# prepare dataset - iris but only with two classes
+iris_tbl_ind2 <- iris_tbl %>% 
+  filter(Species != "virginica") %>% 
+  ft_string_indexer("Species", "Species_ind")
+
+train_test2 <- iris_tbl_ind2 %>% 
+  sdf_partition(training = 0.7, testing = 0.3)
+
+training_tbl2 <- train_test2$training
+testing_tbl2 <- train_test2$testing
+
+# train logistic regression model
+model_logr <- training_tbl2 %>%
+  ml_logistic_regression(Species_ind ~ Petal_Length + Petal_Width)
+
+# check model summary
+summary(model_logr)
+
+# predict classes for testing set
+pred_logr <- sdf_predict(model_logr, testing_tbl2) 
+
+# compare predicted classes with real classess (in R)
+result_logr <- pred_logr %>% 
+  select("Species_ind", "prediction") %>% 
+  collect()
+table(result_logr$prediction, result_logr$Species_ind)
+
+# model evaluation
+ml_binary_classification_eval(pred_logr, "Species_ind", "prediction", metric = "areaUnderROC")
+```
+
+Use Spark’s logistic regression to perform logistic regression, modeling a binary outcome as a function of one or more explanatory variables.
+
+### Decision tree
+```{r, eval=FALSE, results=FALSE, warning=FALSE, message=FALSE}
+# train decision tree model
+model_dt <- training_tbl %>%
+  ml_decision_tree(Species_ind ~ Petal_Length + Petal_Width)
+
+# predict classes for testing dataset
+predict_dt <- sdf_predict(model_dt, testing_tbl)
+
+# compare predicted classes with real classess (in R)
+result_dt <- predict_dt %>% 
+  select("Species_ind", "prediction") %>% 
+  collect()
+table(result_dt$prediction, result_dt$Species_ind)
+
+# feature importance
+ml_tree_feature_importance(conn, model_dt)
+
+# evaluate model
+ml_classification_eval(predict_dt, "Species_ind", "prediction", metric = "accuracy")
+```
+
+Perform regression or classification using decision trees.
+
+### Random forests
+Use Spark’s Random Forest to perform regression or multiclass classification.
+
+```{r, eval=FALSE, results=FALSE, warning=FALSE, message=FALSE}
+# train random forest model
+model_rf <- testing_tbl %>%
+  ml_random_forest(Species_ind ~ Petal_Length + Petal_Width, type = "classification")
+
+# predict classes for testing dataset
+predict_rf <- sdf_predict(model_rf, testing_tbl)
+
+# compare predicted classes with real classess (in R)
+result_rf <- predict_rf %>% 
+  select("Species_ind", "prediction") %>% 
+  collect()
+table(result_rf$prediction, result_rf$Species_ind)
+
+# feature importance
+ml_tree_feature_importance(conn, model_rf)
+
+# evaluate model
+ml_classification_eval(predict_rf, "Species_ind", "prediction", metric = "accuracy")
+```
+
+### Utilities
+There are few function which are very useful for interacting with Spark model fits:
+
+- `ml_binary_classification_eval()` - calculates the area under the curve (`metric = "areaUnderROC"`) for a binary classification model,
+- `ml_classification_eval()` - calculates performance metrics (`metric = c("f1", "precision", "recall", "weightedPrecision", "weightedRecall", "accuracy"`) for binary and multiclass classification model.
+- `ml_tree_feature_importance()` - calculates variable importance for decision trees (i.e. decision trees, random forests, gradient boosted trees).
+
+## Working workflow
+
+An analytic workflow with `sparklyr` might be composed of the following stages. For an example see Example Workflow:
+
+- perform SQL queries through the `sparklyr` `dplyr` interface,
+- use the `sdf_*()` and `ft_*()` family of functions to generate new columns, or partition your data set,
+- choose an appropriate machine learning algorithm from the `ml_*()` family of functions to model your data,
+- inspect the quality of your model fit, and use it to make predictions with new data.
+- collect the results for visualization and further analysis in R
+
+```{r, eval=FALSE, results=FALSE, warning=FALSE, message=FALSE}
+# read data from csv 
+library(dplyr)
+spark_read_csv(conn, "titanic", "data/titanic_spark.csv")
+titanic_tbl <- tbl(conn, "titanic")
+
+# tidy the data
+titanic_final_tbl <- titanic_tbl %>% 
+  mutate(Parch = as.numeric(Parch), Fare = as.numeric(Fare), Survived = as.double(Survived)) %>% 
+  mutate(family_size = SibSp + Parch + 1) %>% 
+  filter(!is.na(Embarked)) %>% 
+  mutate(Age = if_else(is.na(Age), mean(Age), Age)) %>% 
+  ft_bucketizer("family_size", "family_bucket", splits = c(1,2,5,12)) %>% 
+  mutate(family_bucket = as.character(as.integer(family_bucket))) %>% 
+  select(Survived, Pclass, Sex, Age, SibSp, Parch, Fare, Embarked, family_size) 
+
+# split data
+partition <- titanic_final_tbl %>% 
+  sdf_partition(train = 0.7, test = 0.3)
+train_tbl <- partition$train
+test_tbl <- partition$test
+
+# train the models
+ml_formula <- formula(Survived ~ Pclass + Sex + Age + SibSp + Parch + Fare + Embarked + family_size)
+
+ml_logr <- ml_logistic_regression(train_tbl, ml_formula)
+ml_dt <- ml_decision_tree(train_tbl, ml_formula)
+ml_rf <- ml_random_forest(train_tbl, ml_formula)
+
+# test data
+ml_models <- list(
+  "Logistic" = ml_logr,
+  "Decision Tree" = ml_dt,
+  "Random Forest" = ml_rf
+)
+
+score_test_data <- function(model, data = test_tbl) {
+  pred <- sdf_predict(model, data)
+  select(pred, Survived, prediction)
+}
+
+ml_score <- lapply(ml_models, score_test_data)
+
+# compare results (AUC and accuracy)
+# function for calculating accuracy
+calc_accuracy <- function(data, cutpoint = 0.5){
+  data %>% 
+    ml_classification_eval("prediction", "Survived", "accuracy")
+}
+
+# calculate AUC and accuracy
+perf_metrics <- data.frame(
+  model = names(ml_score),
+  AUC = 100 * sapply(ml_score, ml_binary_classification_eval, "Survived", "prediction"),
+  Accuracy = 100 * sapply(ml_score, calc_accuracy),
+  row.names = NULL, stringsAsFactors = FALSE)
+
+# plot results
+library(tidyr)
+library(ggplot2)
+gather(perf_metrics, metric, value, AUC, Accuracy) %>%
+  ggplot(aes(reorder(model, value), value, fill = metric)) + 
+  geom_bar(stat = "identity", position = "dodge") + 
+  coord_flip() +
+  xlab("") +
+  ylab("Percent") +
+  ggtitle("Performance Metrics")
+```
+
+# Sources
+
+- https://spark.rstudio.com/index.html
+- https://www.datacamp.com/courses/introduction-to-spark-in-r-using-sparklyr
+- https://beta.rstudioconnect.com/content/1518/notebook-classification.html

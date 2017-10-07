@@ -1,0 +1,156 @@
+---
+title: "Introduction to Spark in R (using *sparklyr*)"
+subtitle: "<small><br>Justyna Jankowiak</small>"
+author: "<small>
+<a href='https://stackoverflow.com/users/3477789/jjankowiak'><i class='fa fa-stack-overflow'></i></a>&nbsp;&nbsp;
+<a href='https://github.com/jjankowiak'><i class='fa fa-github'></i></a>&nbsp;&nbsp;
+<a href='https://www.linkedin.com/in/justynajankowiak/'><i class='fa fa-linkedin'></i></a>&nbsp;&nbsp;
+<a href='mailto:just.jankowiak@gmail.com'><i class='fa fa-envelope-o'></i></a>
+</small><br>"
+date: 07-08.10.2017
+output:
+  revealjs::revealjs_presentation:
+    theme: black
+    highlight: pygments
+    self_contained: false
+    center: true
+    reveal_options:
+      slideNumber: true
+      previewLinks: true
+---
+
+```{r, include=FALSE}
+htmltools::tagList(rmarkdown::html_dependency_font_awesome())
+```
+
+# What is Spark?
+
+## What is Spark?
+![Thanks](images/spark_logo.png)
+
+> **Apache Spark™** is a fast and general engine for large-scale data processing.
+
+<small> Source: [https://spark.apache.org/](https://spark.apache.org/) </small>
+
+# What are the benefits of Spark?
+
+## Speed
+
+Spark runs programs up to 100x faster than Hadoop MapReduce in memory, or 10x faster on disk. 
+
+![Thanks](images/logistic-regression.png)
+
+<small> Source: [https://spark.apache.org/](https://spark.apache.org/) </small>
+
+## Ease of use
+Spark has easy-to-use APIs in Java, Scala, Python and R for operating on large datasets. 
+
+## Generality 
+Spark comes packaged with higher-level libraries, including support for SQL queries, streaming data, machine learning and graph processing.
+
+![Thanks](images/ecosystem.png)
+
+<small> Source: [https://databricks.com/spark](https://databricks.com/spark) </small>
+
+# Spark Ecosystem
+
+## Spark SQL + DataFrames
+
+> **Spark SQL** is module for working with structured data.
+
+## Spark SQL + DataFrames
+
+- lets you query structured data inside Spark programs, using either SQL or a familiar DataFrame API,
+- acts like distributed SQL query engine,
+- enables unmodified Hadoop Hive queries to run up to 100x faster,
+- provides industry standard JDBC and ODBC connectivity for business intelligence tools.
+
+## Streaming
+
+> **Spark Streaming** makes it easy to build scalable fault-tolerant streaming applications.
+
+## Streaming
+
+- lets you write streaming jobs the same way you write batch jobs,
+- is fault-tolerant - recovers lost work out of the box,
+- intergrates with a wide variety of popular data sources, including HDFS, Flume, Kafka and Twitter.
+
+## MLlib (Machine Learning)
+
+> **MLlib** is Apache Spark's scalable machine learning library.
+
+## MLlib (Machine Learning)
+
+- usable in Java, Scala, Python and R,
+- contains high-quality algorithms that leverage iteration, and can yield better results than the one-pass approximations sometimes used on MapReduce,
+- runs on existing Hadoop clusters and data.
+
+## GraphX (Graph Computation)
+
+> **GraphX** is Apache Spark's API for graphs and graph-parallel computation.
+
+## GraphX (Graph Computation)
+
+- competes on performance with the fastest graph systems while retaining Spark's flexibility, fault tolerance and ease of use,
+- comes with variety of graph algorithms.
+
+# Spark in R
+
+## *SparkR* and *sparklyr*
+
+*SparkR* and *sparklyr* are both R interfaces to Spark, which:
+
+- support connecting to local and remote Spark clusters,
+- provide a *dplyr* compatible back-end,
+- provide an interface to Spark's built-in machine learning algorithms.
+
+<small>Worth reading: [*sparklyr* and *SparkR* - the future?](https://github.com/rstudio/sparklyr/issues/502) </small>
+
+## sparklyr
+
+- connects to Spark from R and provides a complete *dplyr* backend,
+- filters and aggregates Spark datasets then brings them into R for analysis and visualization,
+- uses Spark’s distributed machine learning library from R,
+- creates extensions that call the full Spark API and provides interfaces to Spark packages.
+
+## sparklyr
+
+![Thanks](images/sparklyr.png)
+<small> Source: [https://blog.cloudera.com](https://blog.cloudera.com/blog/2016/09/introducing-sparklyr-an-r-interface-for-apache-spark/) </small>
+
+## A word of warning
+
+- Spark is still new technology and sometimes you don't get clear error messages,
+- *sparklyr* is newer and doesn't have a full set of features - the Scala and Python interfaces to Spark are more mature.
+
+# How to start working with Spark and *sparklyr*?
+
+## Install *sparklyr*
+
+```{r, eval = FALSE}
+# install devtools package
+install.packages("devtools")
+library(devtools)
+# install the latest version of sparklyr
+devtools::install_github("rstudio/sparklyr")
+```
+
+## Install Spark through *sparklyr*
+
+```{r, eval = FALSE}
+library(sparklyr)
+# check available versions of Spark
+spark_available_versions()
+# install locally the latest version
+spark_install(version = "2.2.0")
+```
+
+## Make sure Java is installed
+```{bash, eval = FALSE}
+# check available version of Java
+java -version
+# if not available, install it
+sudo apt install openjdk-8-jdk openjdk-8-jre
+```
+
+# Let's start coding!
