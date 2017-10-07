@@ -46,13 +46,13 @@ load("ranking.rda")
 ###dplyr
 ##Korzystamy z danych z pakietu PBImisc
 library(PBImisc)
-apartaments <- PBImisc::apartments
+apartments <- PBImisc::apartments
 
 ##select
 ?select
-wybraneKolumny <-select(apartaments,c("city","district","street","m2.price"))
+wybraneKolumny <-select(apartments,c("city","district","street","m2.price"))
 
-price <- select(apartaments,ends_with("price"))
+price <- select(apartments,ends_with("price"))
 
 ##filter
 ?filter
@@ -62,19 +62,19 @@ Srodmiescie_Ochota <- filter(wybraneKolumny,district=="Srodmiescie"| district=="
 Srodmiescie_ulica <- filter(wybraneKolumny,district=="Srodmiescie", street=="Bagno")
 
 ##Zadanie 2
-#W zbiorze danych apartaments znajdź najtańsze mieszkanie (cena za m2) na Woli o powierzchni większej niż 50 m2.
+#W zbiorze danych apartments znajdź najtańsze mieszkanie (cena za m2) na Woli o powierzchni większej niż 50 m2.
 
 ##group_by
 ?group_by
-apartaments_gr <- group_by(apartaments, district)
+apartments_gr <- group_by(apartments, district)
 #nie zmienia nam ramki (ale w strukturze tabeli jest zapisane ze wiersze z taką samą wartością w kolumnie district są w jednej grupie)
 
 ##summarise
 ?summarise
 
-apartaments_sr_cena <- summarise(apartaments_gr, mean_m2 = mean(m2.price))
+apartments_sr_cena <- summarise(apartments_gr, mean_m2 = mean(m2.price))
 
-apartaments_sr_pow<- summarise(apartaments_gr, mean_m2 = mean(surface), number=n())
+apartments_sr_pow<- summarise(apartments_gr, mean_m2 = mean(surface), number=n())
 
  
 ##Zadanie 3
@@ -85,25 +85,25 @@ apartaments_sr_pow<- summarise(apartaments_gr, mean_m2 = mean(surface), number=n
 ##arrange
 ?arrange
 
-dzielnice <- arrange(apartaments, district) #mamy alfabetycznie pogrupowane ze względu na dzielnice
-dzielnice <- arrange(apartaments, district, desc(m2.price)) #cena za m2 malejąco
+dzielnice <- arrange(apartments, district) #mamy alfabetycznie pogrupowane ze względu na dzielnice
+dzielnice <- arrange(apartments, district, desc(m2.price)) #cena za m2 malejąco
 
 ##mutate
 ?mutate
 
-apartaments2 <- mutate(apartaments, sr_pow_pok = surface/n.rooms)
+apartments2 <- mutate(apartments, sr_pow_pok = surface/n.rooms)
 #dodaliśmy kolumnę ze średnią powierzchnią pokoju
 
 ##Zadanie 4
 #a) Znajdź mieszkanie na Środmieciu, którego cena za m2 jest najniższa (arrange)
-#b) Do zbioru danych apartaments dodaj kolumnę z ceną w EUR
+#b) Do zbioru danych apartments dodaj kolumnę z ceną w EUR
 
 
 ####################################################
 ##%>% pipe operator
 #służy do składania wielu komend na raz.
 
-apartaments_sr_pow3 <- apartaments %>% group_by(district) %>% summarise(mean_surface = mean(surface))
+apartments_sr_pow3 <- apartments %>% group_by(district) %>% summarise(mean_surface = mean(surface))
 
 #Zadanie 5
 #Używając operatora %>% ponownie zrób zadanie 3b : Znajdź średnią ceną za mieszkanie grupując dane ze względu na zmienną "type"
