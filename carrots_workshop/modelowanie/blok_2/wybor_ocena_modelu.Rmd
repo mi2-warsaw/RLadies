@@ -139,7 +139,8 @@ test_default_pred <- predict(log_default_model, newdata = prices_test)
 ```
 
 ```{r}
-mse(actual = log(prices_test$sale_price), predicted = log_default_model$fitted.values)
+mse(actual = log(prices_test$sale_price), 
+    predicted = log_default_model$fitted.values)
 ```
 
 
@@ -160,7 +161,7 @@ polynomial_data %>%
 
 2. Dodajmy szum
 ```{r}
-polynomial_data$y <- polynomial_data$y + rnorm(length(grid), 1, 0.5) 
+polynomial_data$y <- polynomial_data$y + rnorm(length(grid), 0, 0.5) 
 polynomial_data %>% 
     ggplot(aes(x, y)) + geom_point()
 ```
@@ -227,7 +228,7 @@ W LASSO minimalizujemy funkcję straty, pilnując, by parametry $\beta$ nie mia�
 
 $$\min_{\hat{\beta}}\frac{1}{n} \sum_{i = 1}^n(y_i - X\hat{\beta})^2 
     \;\; \mathrm{dla} \;\; 
-\sum_{j = 1}^k|\beta_j| \leq t.$$
+\sum_{j = 1}^k|\hat{\beta_j}| \leq t.$$
 $\beta_0$ jest pominięty w powyższej sumie! 
 $t$ to pewien hiperparametr, który wymaga ustalenia.
 
@@ -324,6 +325,7 @@ cbind.data.frame(polynomial_data, ridge_prediction) %>%
 ```{r}
 my_model <- models[[25]]
 broom::glance(my_model)
+models[[25]] %>% summary()
 ```
 
 
