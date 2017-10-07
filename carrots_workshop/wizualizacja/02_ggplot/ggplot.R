@@ -37,8 +37,9 @@ head(dane)
 #         labs(title = "...", x = "...", y = "...") +
 #     ...
 #     scale_y_manual(values = ..., name = "...", label = ...) +
-#         scale_y_discrete() +
-#         scale_color_manual() +
+#     scale_y_discrete() +
+#     scale_y_continuous() +
+#     scale_color_manual() +
 #     ...
 
 ################################################################################
