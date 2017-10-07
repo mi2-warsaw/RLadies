@@ -80,7 +80,7 @@ is.tbl(house_prices_tbl)
 print(house_prices_tbl)
 
 # print first 5 rows with the width of 25 characters
-print(house_prices_tbl, width = 25)
+print(house_prices_tbl, n = 5, width = 25)
 
 # examine the stucture with str() function
 str(house_prices_tbl)
