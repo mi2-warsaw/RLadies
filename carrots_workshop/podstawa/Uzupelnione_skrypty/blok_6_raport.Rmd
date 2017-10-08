@@ -1,0 +1,61 @@
+---
+title: "Wybrany serial"
+author: "Alicja Gosiewska, Aleksnadra Dąbrowska"
+date: "8 października 2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
+```
+
+
+```{r}
+library(ggplot2)
+library(PogromcyDanych)
+```
+
+#Informacje z danych
+
+```{r}
+Dexter <- filter(serialeIMDB, serial == "Dexter")
+```
+
+```{r}
+mean(Dexter$ocena)
+```
+
+```{r}
+mean(Dexter$glosow)
+```
+
+
+#Wykresy 
+
+##Prosty plot
+```{r}
+plot(Dexter$id, Dexter$glosow, type="b")
+
+```
+
+#A może ggplot2?
+```{r}
+ggplot(Dexter, aes(id, glosow)) + 
+  geom_line()+
+  geom_point(aes(col=sezon))+
+  theme(title=element_text("Liczba głosów w zależności od numeru odcinka"),
+        axis.title.x = element_text("id odcinka"),
+        axis.title.y = element_text("liczba głosów"))
+  
+```
+
+##GGplot2 ciąg dalszy
+```{r}
+ggplot(Dexter, aes(x = id, y =ocena, col = sezon)) + 
+  geom_point() +
+  geom_smooth(aes(col = sezon), method = "lm", se=FALSE)+
+  theme_bw()+
+  facet_wrap(~sezon, scales = "free")+
+  theme(title=element_text("Dexter w podziale na sezony"))
+
+```
