@@ -1,0 +1,146 @@
+---
+title: "Moj pierwszy plik Rmarkdown"
+author: "Natalia Potocka"
+output:
+  html_document:
+    toc: yes
+---
+
+# Duzy naglowek
+
+## Troche mniejszy
+
+Moj super dlugi paragraf mowiacy o mojej dlugiej analizie. 
+
+# Kolejny rozdzail
+
+### Jeszcze mniejszy naglowek
+
+#### Najmniejszy
+
+# Formatowanie
+
+Nasz tekst będzie pogrubiony: **o tak** albo __o tak__
+Nasz tekst będzie pochylony: __*o tak*__ albo _o tak_
+
+## Listy
+
+5. pierwszy element
+    - podlista 1
+    - podlista 2
+1. drugi element  
+ 
+3. trzeci element
+4. kolejna
+
+
+* Element pierwszy
+* Element drugi
+    - podeelemnt drugi pierwszy
+        + kolejna podlista
+    - podelement drugi drugi
+    
+## Nowa linia
+
+jak pisze jakis teskt  (<- tu dwie spacje)  
+i chce zrobic enter
+
+## Linki
+
+http://google.com
+
+[tekst ktory sie pokazuje zamiast linku](http://google.com)
+
+# Kody
+
+```
+tutaj kod, ktory wyglada jak kod
+```
+
+```python
+for i in krotka:
+    print(i)
+```
+
+```r
+for(i in 1:10)
+    print(i)
+```
+
+
+```{r}
+print("1")
+print(1:10)
+```
+
+
+```{r,echo=FALSE}
+print("2")
+print(1:10)
+```
+
+
+```{r,eval=FALSE}
+print("3")
+print(1:10)
+```
+
+
+```{r,results='hold'}
+print("4")
+print(1:10)
+```
+
+```{r,results='hide'}
+print("5")
+print(1:10)
+x <- 1:10
+```
+
+
+```{r}
+sum(x)
+```
+
+
+```{r,results='asis'}
+iris[1:3, 1:4]
+knitr::kable(iris[1:3,1:4])
+```
+
+library(dplyr) <- tu nie zadziała
+
+```{r,message=FALSE}
+library(dplyr) #ładowanie pakietów tylko i wyłącznie w chunkach
+# dane %>% mutate(...)
+```
+
+
+
+```{r,cache=TRUE}
+plot(1:100000, rnorm(100000))
+```
+
+
+```{r,echo=FALSE}
+knitr::opts_chunk$set(echo = FALSE,fig.width = 8) #globalne ustawienia chunków
+```
+
+```{r}
+print("ala ma kota") #kod R-owy się nie pokaże, tylko wynik
+```
+
+```{r,echo=TRUE}
+print("Tola ma tablet") #lokalnie mogę zmienić, że kod się bedzie pokazywać
+x <- 1:5
+```
+
+
+Piszę jakiś teskt i potrzebuje napisać np. `zmienną` w stylu kodu.
+
+I chce wypisac np. x[1]: `r x[1]`
+
+
+
+
+
