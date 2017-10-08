@@ -15,6 +15,7 @@ shinyUI(
         #              label="EtykietaWidocznaDlaUżytkownika", 
         #              list=listaMozliwychDoPrzyjęciaWartości, 
         #              selected/value=WartośćPoczątkowa)
+        #  
         # "nazwaKontrolkiJakoObiektuRoewgo" - nazwa obiektu, do ktorego będziemy
         # się odwoływać pisząc kod Rowy(użytkownik tego nie widzi)
         #
@@ -30,10 +31,10 @@ shinyUI(
         actionButton("przycisk", label = h3("Wciśnij mnie")),
         
         #Pojedynczy checkbox - odznaczamy lub zaznaczymy jakąś opcję
-        checkboxInput("checkbox", label = "Pokaż wykres", value = TRUE ),
+        checkboxInput("checkbox", label = "Pokaż wykres", value = TRUE),
         
         #Grupa checkboxów - możliwy wybór wieloktorny
-        checkboxGroupInput("checkGroup", label="Rodzaj zabudowy:", 
+        checkboxGroupInput("checkGroup", label = "Rodzaj zabudowy:", 
                            choices = list("Apartamentowiec" = 1, 
                                           "Blok" = 2, 
                                           "Kamienica" = 3,
@@ -74,7 +75,9 @@ shinyUI(
         
         #Możliwości podania daty lub jej zakresu
         dateInput("data", label = "Data", value = "2017-10-08"),
-        dateRangeInput("dates", label = "Zakres dat", start = "2017-01-01", end = Sys.Date()),
+        dateRangeInput("dates", label = "Zakres dat", 
+                       start = "2017-01-01", end = Sys.Date(),
+                       language = "pl", weekstart = 1),
         
         #Załadowanie pliku
         fileInput("file", label = "Wybierz plik"),

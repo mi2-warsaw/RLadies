@@ -6,7 +6,7 @@ shinyUI(fluidPage(
   sidebarLayout(
     #Panel boczny na kontrolki
     sidebarPanel("Tutaj umieszczam wszystko co ma się wyświetlić w panelu bocznym."
-#                   ,"Jeśli odkomentujesz tą część i ponownie uruchomisz aplikację
+#                  ,"Jeśli odkomentujesz tą część i ponownie uruchomisz aplikację
 #                   zobaczysz, że panel powiększa się wraz ze wzostem zawartości"
                  ),
     

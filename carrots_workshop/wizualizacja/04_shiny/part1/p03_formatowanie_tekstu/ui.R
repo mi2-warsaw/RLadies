@@ -14,7 +14,7 @@ shinyUI(fluidPage(
       #HTML("<h1> Największy tytuł </h1>") . Wszystkie funkcje poniżej są po prostu 
       #ładnym opakowaniem dla Rowców ;)
       #Jakie mamy możliwości?
-      
+      HTML("<h1>Mój super tytuł</h1>"),
       #Tytuły - różne rozmiary
       h1("TYTUŁY"),
       h1("h1() Pierwszy poziom tytułu"),
@@ -54,8 +54,10 @@ shinyUI(fluidPage(
         style="color:green"),
       
       #Łączenie możliwości w jednym tekście
-      p("Zagnieżdżając funkcję możemy", strong(" pogrubić tekst, "), 
-        em("pochylić go,"), strong("czy pokolorować tylko jego część", 
+      p("Zagnieżdżając funkcję możemy", 
+        strong(" pogrubić tekst, "), 
+        em("pochylić go,"), 
+        strong("czy pokolorować tylko jego część", 
                               style="color:purple")),
       #Możemy też dodać zwykły tekst
       "Fragment standardowego tekstu",
@@ -66,7 +68,7 @@ shinyUI(fluidPage(
       
       #Do naszej aplikacji możemy dodawać także zdjęcia za pomocą funkcji img()
       #Zdjęcia te umieszczamy w specjalnym folderze o nazwie "www"
-      img(src="k.jpg", width=250, height=200)
+      img(src="k.jpg", width=250, height=200, align="right")
     )
   )
 ))

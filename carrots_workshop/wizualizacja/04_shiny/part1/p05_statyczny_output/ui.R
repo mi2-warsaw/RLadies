@@ -104,7 +104,7 @@ shinyUI(
         #i do panelu bocznego i na ekran wynikowy
       ),
       mainPanel(
-        plotOutput("wykres1"),
+        #plotOutput("wykres1"),
         plotOutput("wykres2")
       )
     )
