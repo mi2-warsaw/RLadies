@@ -15,7 +15,6 @@ The typical workflow has three steps:
 
 ```{r, eval=FALSE, results=FALSE, warning=FALSE, message=FALSE}
 library(sparklyr)
-
 # connect
 conn <- spark_connect(master = "local")
 # It's possible that you have to set JAVA_HOME and SPARK_HOME variables 
@@ -48,6 +47,7 @@ Loading data is a slow process - when working with big data we want to avoid cop
 # For this chunk and all following once we assume that the sparklyr library is loaded 
 # and connection to Spark is established
 
+setwd('/home/abrodecka/RLadies/carrots_workshop/modelowanie')
 # read data from csv 
 spark_read_csv(conn, "titanic", "data/titanic_spark.csv")
 
@@ -83,6 +83,7 @@ print(house_prices_tbl)
 print(house_prices_tbl, n = 5, width = 25)
 
 # examine the stucture with str() function
+str(Boston)
 str(house_prices_tbl)
 
 # examine the structure with glimpse() function
@@ -119,34 +120,34 @@ All operations are performed on tibble objects. The `dplyr` methods use Spark SQ
 # age - proportion of owner-occupied units built prior to 1940
 # medv - median value of owner-occupied homes in 1000$
 house_prices_tbl %>% 
-  select(crim, age, medv)
+  dplyr::select(crim, age, medv)
 
 # note that square bracket indexing is not supported 
 house_prices_tbl[, c("crim", "age", "medv")]
 
 # choose all but crim, age, medv
 house_prices_tbl %>% 
-  select(-crim, -age, -medv)
-
+  dplyr::select(-crim, -age, -medv)
+library(dplyr)
 # select columns between nox and tax
 house_prices_tbl %>% 
-  select(nox:tax)
+  dplyr::select(nox:tax)
 
 # select all columns starting from "r"
 house_prices_tbl %>% 
-  select(starts_with("r"))
+  dplyr::select(starts_with("r"))
 
 # select all columns containing "rat" 
 house_prices_tbl %>% 
-  select(contains("rat"))
+  dplyr::select(contains("rat"))
 
 # select all columns matching regular expression (ends with "s")
 house_prices_tbl %>% 
-  select(matches("s$"))
+  dplyr::select(matches("s$"))
 
 # select all columns matching regular expression (two "t"s with some letter(s) between)
 house_prices_tbl %>% 
-  select(matches("t.+t"))
+  dplyr::select(matches("t.+t"))
 ```
 
 Selecting columns id done by function `select()` with unquoted names of the columns you want to keep. You can also select columns by excluding some columns, with `-` before the name.
@@ -254,7 +255,7 @@ house_prices_tbl %>%
 house_prices_tbl %>% 
   group_by(chas) %>% 
   mutate(age_norm = (age - mean(age)) / sd(age)) %>% 
-  select(chas, age, age_norm)
+  dplyr::select(chas, age, age_norm)
 ```
 
 We use `group_by()` followed by `summarise()` or `mutate()` when we want to apply a summary statistic on each group or mutate column with group-specific values (respecively).

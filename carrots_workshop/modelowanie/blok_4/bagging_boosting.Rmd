@@ -125,6 +125,12 @@ importance(forest)
     geom_bar(stat = 'identity', fill = 'navy') + coord_flip()
 ```
 
+install.packages('devtools', dependencies = T)
+library(devtools)
+devtools::install_github("MI2DataLab/randomForestExplainer")
+library(randomForestExplainer)
+
+
 #### Czas na randomForestExplainer!
 https://cran.r-project.org/web/packages/randomForestExplainer/vignettes/randomForestExplainer.html
 ```{r}
