@@ -18,8 +18,8 @@ library(dplyr)
 data("serialeIMDB")
 View(serialeIMDB)
 
-serialeIMDB$sezon <- as.numeric(serialeIMDB$sezon)
-serialeIMDB$odcinek <- as.numeric(serialeIMDB$odcinek)
+serialeIMDB$sezon <- as.numeric(as.character(serialeIMDB$sezon))
+serialeIMDB$odcinek <- as.numeric(as.character(serialeIMDB$odcinek))
 
 GoT <- filter(serialeIMDB, serial == "Game of Thrones")
 
