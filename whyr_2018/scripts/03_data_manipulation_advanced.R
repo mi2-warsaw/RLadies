@@ -87,6 +87,7 @@ arrange(friends, desc(ocena))
 ### gather
 
 tb <- read.csv("./data/tb.csv", stringsAsFactors = FALSE, sep=",")
+tb <- select(tb, -X)
 View(tb)
 
 tb2 <- tb %>% 
