@@ -58,7 +58,7 @@ friends_sr_sezon <- summarize(friends_sezon, sr_sezon = mean(ocena))
 friends_liczba_glosow <- summarize(friends_sezon, liczba_glosow = sum(glosow))
 
 friends_podsumowanie <- summarize(friends_sezon, liczba_glosow = sum(glosow), sr_sezon=mean(ocena))
-
+View(friends_podsumowanie)
 
 ### arrange
 arrange(friends, desc(ocena))
@@ -86,9 +86,8 @@ arrange(friends, desc(ocena))
 
 ### gather
 
-tb <- read.csv("tb.csv", stringsAsFactors = FALSE, sep=";")
+tb <- read.csv("./data/tb.csv", stringsAsFactors = FALSE, sep=",")
 View(tb)
-tb <- tb[,-1]
 
 tb2 <- tb %>% 
   gather(demo, n, -iso2, -year, na.rm = TRUE)
@@ -131,8 +130,10 @@ weather3 %>% spread(element, value)
 ###dplyr - zaawansowane
 ####################################################################################
 
-billboard <- read.csv("billboard.csv", stringsAsFactors = FALSE)
+billboard <- read.csv("./data/billboard.csv", sep = ",", stringsAsFactors = FALSE)
 View(billboard)
+
+billboard <- select(billboard, -X)
 
 #male czyszczenie
 billboard2 <- billboard %>% 
